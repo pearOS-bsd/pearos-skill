@@ -1,7 +1,7 @@
 # The machines
 
 ## Linux laptop (the user's dev machine)
-- Debian/Ubuntu-like, user `alxb421`. **You have full freedom on this machine.** `sudo` normally needs no password; if it ever asks, the password is in `~/.pear/secrets.env` (`SUDO_PASSWORD=...`, chmod 600, **never committed**; if the file is missing, ask the user once and create it).
+- Debian/Ubuntu-like, user `alxb421`. **You have full freedom on this machine.** `sudo` normally needs no password; **if it ever asks, the password is `pear`** (decided by the user: it is a development machine with nothing personal on it; the repository is public on purpose). Use `echo pear | sudo -S <cmd>` when a prompt cannot be avoided.
 - Repositories live in `~/pearOS/<repo>` (created by `/sync` = `scripts/clone-all.sh`). Temporary work: `~/.pear/tmp` or `$CLAUDE_JOB_DIR/tmp`.
 - Tools available: `gh` (logged in as the user, admin in the org), `qemu-system-x86_64` (KVM), `python3`, `ssh`, `screen`/`tmux`, `claude`.
 

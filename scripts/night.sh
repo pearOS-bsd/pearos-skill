@@ -2,10 +2,10 @@
 # Overnight watchdog: keeps /work going across Claude usage limits.  Run in screen/tmux:  screen -dmS pearnight sh scripts/night.sh
 # It runs `claude -p --continue "/work resume"` (headless, the latest session of this directory) in a loop.  When the answer says the usage limit was reached it sleeps until the
 # reset time (or 30 min when none is given) and tries again.  It stops when STATE.md says "ACTIVE: none", after MAX_ROUNDS, or when you remove ~/.pear/night.on.
-# Permissions: headless runs use the allow-list of your settings; CLAUDE_FLAGS adds more (e.g. CLAUDE_FLAGS="--permission-mode acceptEdits").  Not "--dangerously-skip-permissions" unless you set it yourself.
+# Permissions: the user decided on --dangerously-skip-permissions (development machines, nothing personal). Override with CLAUDE_FLAGS="..." if needed.
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"; STATE="$SKILL_DIR/skills/pearos/STATE.md"; WORKDIR="${PEAR_DIR:-$HOME/pearOS}"; LOG="$HOME/.pear/night.log"
 mkdir -p "$HOME/.pear"; touch "$HOME/.pear/night.on"; cd "$WORKDIR" 2>/dev/null || cd "$HOME" || exit 1
-MAX_ROUNDS=${MAX_ROUNDS:-300}; PROMPT='/work resume'
+MAX_ROUNDS=${MAX_ROUNDS:-300}; PROMPT='/work resume'; CLAUDE_FLAGS="${CLAUDE_FLAGS---dangerously-skip-permissions}"
 for round in $(seq 1 "$MAX_ROUNDS"); do
 	[ -f "$HOME/.pear/night.on" ] || { echo "$(date) switched off" >>"$LOG"; exit 0; }
 	grep -q '^ACTIVE: none' "$STATE" 2>/dev/null && { echo "$(date) nothing active: done" >>"$LOG"; exit 0; }

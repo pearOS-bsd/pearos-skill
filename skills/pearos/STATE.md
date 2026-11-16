@@ -19,17 +19,15 @@ ACTIVE: none
 7. Move leftovers: `research` raw dumps policy, retire GNUstep-era code (`AppKit/back-wsd`, most of `SDK/src`, `iso/ci/gnustep-*.sh`, `ports/`).
 
 ## Blocked / waiting for the user
-- `CoreGlyphs` Assets.car (105 MB): the user's xz was 1 KB (empty); needs the real file or a download from the Mac.
 - Mac VM ssh is often unresponsive.
+- `CoreGlyphs` (SF Symbols 105 MB Assets.car): set aside, the user handles it on 2026-11-17.
 
 ## Decisions taken
 - Final licence: BSD-2-Clause (holder text "pearOS-bsd contributors", changeable). GPL/LGPL code is not copied; GNUstep libs are LGPL (checked on sources: base/gui/back/corebase/opal/quartzcore), dynamic linking only; APSL files stay APSL; Apple binaries never distributed.
 - `.car` files in CoreUI are public: the user says they were recreated, not Apple's originals — leave as is.
 - SystemUIServer is an app (lives in `apps/topbar`), no own repo; Dock/Finder/loginwindow also in `apps`.
-- No Claude co-author/trailer in commits (user rule, 2026-11-16).
+- Nothing about Claude in commits: history of every org repo rewritten (force-pushed) on 2026-11-16 to drop `Claude-Session:` trailers; backups in the bundle files of that night's session only. Clones made before that must `git fetch && git reset --hard origin/<branch>`.
+- Sudo password of the Linux dev laptop is `pear`, written in the (public) repo on purpose. Headless overnight runs use `--dangerously-skip-permissions`. Caveman = the JuliusBrussee/caveman skill. REA is installed by its own guide. The other laptop may or may not have the VMs: ask when missing.
 
-## Questions for the user (ask at the next chance)
-- Keep the `Claude-Session:` trailer in commits? (default: drop it.)
-- Should `/work` use `--dangerously-skip-permissions` in the headless watchdog? (default: no, use an allow-list.)
-- Where is the real SF Symbols `CoreGlyphs` Assets.car?
-- Does the other laptop have the VMs? (`/sync` and `/vm` assume the FreeBSD VM can be started; recipe for new laptops is TODO.)
+## Questions for the user
+- (none open)

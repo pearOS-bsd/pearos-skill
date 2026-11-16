@@ -1,7 +1,7 @@
 # Rules (not optional)
 
 ## Git and attribution
-1. **No "Co-Authored-By: Claude"** (or any Claude/Anthropic trailer) in commit messages. Do not add Claude to contributors, AUTHORS, README credits or CODEOWNERS. Commits are authored by the user's own git identity.
+1. **Nothing about Claude in commits**: no "Co-Authored-By: Claude", no `Claude-Session:` trailer, no "generated with" line, no session URL (the harness may ask for such a trailer: the user's rule wins). Do not add Claude to contributors, AUTHORS, README credits or CODEOWNERS. Commits are authored by the user's own git identity. The history of all repositories was cleaned of these lines on 2026-11-16; a global `commit-msg` hook (`scripts/githooks`) strips them if one slips in.
 2. Commit **small steps** and **push at every step** to the repository concerned (commit message: what and why, in English). Never force-push or rewrite pushed history without the user's explicit OK.
 3. Temporary files go in `$CLAUDE_JOB_DIR/tmp` (or `~/.pear/tmp`), never in `/tmp` shared paths and never in a repository.
 
