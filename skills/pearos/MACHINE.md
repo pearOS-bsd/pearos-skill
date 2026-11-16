@@ -35,3 +35,5 @@
 4. Mac VM: OSX-KVM (github.com/kholia/OSX-KVM) with the user's own macOS install (`fetch-macOS-v2.py`), ssh forward 2229, user `alex`. Apple files come from it via `macdeps`.
 5. Ask the user for anything missing (keys, passwords): never invent.
 - **dtrace gotcha**: `dtrace -o FILE` APPENDS and /tmp files made by root cannot be removed by `alex`; a failed script leaves the old file. Use a fresh file per run, `sudo rm` it, check the line count (research/dock-trace scripts do). `fs_usage` does not start on the Mac VM.
+- **Accessibility over ssh works** on the Mac VM (TCC row kTCCServiceAccessibility for sshd-keygen-wrapper, backup `/Users/alex/TCC.db.backup-before-accessibility`): AXUIElement of the Dock gives every tile's title, role and frame (`~/bisect/ax <pid>` pattern in apps/dock-cocoa/README).
+- To compare our Dock with the real one: `sh research/dock-trace/shot-ours.sh out.png` (stops the real Dock, runs ~/dock-cocoa, screenshot, restores the real Dock with bootstrap + kickstart) and `python3 research/dock-trace/pixdiff.py real.png out.png`.
