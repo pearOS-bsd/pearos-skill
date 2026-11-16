@@ -36,7 +36,8 @@ if '--tool' in a:
     args={'path':i('--path')}
     if '--query' in a: args['query']=i('--query')
     print(m.tool(i('--tool'),args)); m.close(); sys.exit(0)
-full='--full' in a; repos=[x for x in a if not x.startswith('--')] or sorted(d for d in glob.glob(PEAR+'/*') if os.path.isdir(d+'/.git'))
+full='--full' in a; SKIP=set(os.environ.get('PEAR_INDEX_SKIP','AppStore-Backend,ploader,virtio,clevo_wmi,kext,misc,pkgbuild,package-repo,codemap,.github').split(','))  # not our code or no code
+repos=[x for x in a if not x.startswith('--')] or sorted(d for d in glob.glob(PEAR+'/*') if os.path.isdir(d+'/.git') and os.path.basename(d) not in SKIP)
 m=MCP()
 for r in repos:
     r=os.path.abspath(os.path.expanduser(r)); t=time.time()

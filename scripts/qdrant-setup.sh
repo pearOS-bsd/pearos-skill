@@ -14,6 +14,7 @@ ollama pull unclemusclez/jina-embeddings-v2-base-code
 NODE=$(ls "$HOME"/.nvm/versions/node/v22*/bin/node 2>/dev/null | tail -1); [ -n "$NODE" ] || NODE=$(command -v node)
 [ -d "$HOME/.pear/qdrant-mcp-server" ] || git clone --depth 1 https://github.com/mhalder/qdrant-mcp-server.git "$HOME/.pear/qdrant-mcp-server"
 (cd "$HOME/.pear/qdrant-mcp-server" && PATH="$(dirname "$NODE"):$PATH" npm install --no-audit --no-fund >/dev/null 2>&1 && PATH="$(dirname "$NODE"):$PATH" npm run build >/dev/null 2>&1)
+python3 "$(dirname "$0")/../patches/mcp-env-ignore.py" "$HOME/.pear/qdrant-mcp-server/build/index.js"   # the server ignores CODE_CUSTOM_IGNORE otherwise (upstream/ got indexed)
 # 4. register in Claude Code (user scope): tools index_codebase, search_code, reindex_changes, contextual_search, index_git_history ...
 if command -v claude >/dev/null 2>&1; then
 	claude mcp remove qdrant >/dev/null 2>&1 || true
