@@ -2,7 +2,7 @@
 Project: Mac-style desktop on FreeBSD that runs real Mac apps. Org github.com/pearOS-bsd (~55 repos, clones in ~/pearOS). Our code: BSD-2-Clause. Start every session: read the skill `pearos` (STATE.md, RULES.md) or run `/status`.
 
 ## Layers (a lower layer never depends on a higher one; put code in the LOWEST layer that can own it)
-0 kernel/ABI: `darwinator`, `IOKit` · 1 runtime/loader: `dyld`, `macdeps`, `libsystem`, `libdispatch`, `libobjc`, `libcxx`, `libxpc`, `swift-runtime`, `thirdparty` · 2 core frameworks: `CoreFoundation`, `Foundation`, `CoreGraphics`, `CoreText`, `ImageIO`, `Security`, `SystemConfiguration`, `CFNetwork`, `CoreServices`, `IconServices`, `LaunchServices`, `CoreUI`, `SDK` · 3 UI/windowing: `SkyLight`→`WindowServer`, `QuartzCore`, `UIFoundation`, `HIToolbox`, `AppKit`, `open` · 4 daemons/apps: `d`, `apps` · tooling: `iso`, `tests`, `docs`, `research`, `pearos-skill`, `codemap`.
+0 kernel/ABI: `darwinator`, `IOKit` · 1 runtime/loader: `dyld`, `macdeps`, `libsystem`, `libdispatch`, `libobjc`, `libcxx`, `libxpc`, `swift-runtime`, `thirdparty` · 2 core frameworks: `CoreFoundation`, `Foundation`, `CoreGraphics`, `CoreText`, `ImageIO`, `Security`, `SystemConfiguration`, `CFNetwork`, `CoreServices`, `IconServices`, `LaunchServices`, `CoreUI`, `SDK` · 3 UI/windowing: `SkyLight`→`WindowServer`, `QuartzCore`, `Solarium`, `UIFoundation`, `HIToolbox`, `AppKit`, `open` · 4 daemons/apps: `d`, `apps` · tooling: `iso`, `tests`, `docs`, `research`, `pearos-skill`, `codemap`.
 
 ## Rules that must never be forgotten
 1. Nothing about Claude in commits (no Co-Authored-By, no Claude trailer/URL); never add Claude to contributors. Small commits, push every step.
