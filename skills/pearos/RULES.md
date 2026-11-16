@@ -18,6 +18,10 @@
 11. **Update the docs every time** (`pearOS-bsd/docs` and the README of the repo you touched) **and update this skill** (`STATE.md` at least; `PROJECT.md` when a repo changes; `RULES.md` when a rule is decided). A task that changed behaviour and not the docs is not finished.
 12. Prefer many small verified steps over big unverified ones; report what was **not** verified honestly.
 
+## The code index (Qdrant MCP, `TOOLS.md`)
+16. **Before writing any utility function, wrapper or new component, you MUST search the codebase index** (`mcp__qdrant__search_code` / `contextual_search`, over every repository in ~/pearOS and the `upstream/` code if indexed separately) for a similar implementation that already exists in ANY repo/project. Reuse or adapt it; if you write new code anyway, say in the commit/doc which candidates you found and why they did not fit. Plain `grep` is not a substitute: the index finds the same idea under another name.
+17. **The index lags behind the files.** Indexing is slow (~2.4 chunks/s on CPU) and Qdrant optimises in the background. After you change a project run `python3 scripts/qdrant-wait.py <repo>` (runs `reindex_changes`, waits until the collections are green and stable) **before** relying on a search about the code you just wrote; an empty result right after an edit proves nothing. Re-index after pulling other people's changes too (`/index`). The 3D code map is republished after a sync.
+
 ## Talking
 13. The user speaks **Romanian**: answer in Romanian, short and concrete. Code, commits, docs and READMEs in English (simple words in public-facing text).
 14. Use **caveman** mode for long autonomous work to save tokens (see TOOLS.md) — never in commit messages, docs, code or when explaining a decision to the user.

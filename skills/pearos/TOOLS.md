@@ -24,3 +24,10 @@ The Claude skill that makes the model "talk like a caveman" (JuliusBrussee/cavem
 
 ## Existing helpers in the repos
 `open/deploy.sh [program]` (build on Mac VM + install on FreeBSD VM + screenshot), `tests/smoke/smoke.sh`, `iso/licenses/audit.sh`, `macdeps/macdeps.sh`, `d/session/*`.
+
+## Qdrant MCP — semantic index of the whole project (saves tokens)
+- Local stack (`scripts/qdrant-setup.sh`): Qdrant in docker (`localhost:6333`, data in `~/.pear/qdrant`), Ollama with `unclemusclez/jina-embeddings-v2-base-code` (768 dims), MCP server `mhalder/qdrant-mcp-server` registered as `qdrant` (Node >= 22). All local.
+- Tools: `index_codebase path`, `search_code path query` (natural language; filters `fileTypes`, `pathPattern`), `reindex_changes path` (incremental), `get_index_status`, `index_git_history`, `search_git_history`, `contextual_search` (code + history). One collection per indexed path.
+- **Search the index first, read files second**: it returns the relevant chunks (file + lines) instead of whole files. Use it before every new utility/wrapper/component (RULES 16).
+- **Delay**: indexing is slow and asynchronous. Use `scripts/qdrant-index.py` (no LLM tokens) and `scripts/qdrant-wait.py <repo>` after edits (RULES 17). First full index of the project: about 2 hours on CPU (~16 000 chunks); `upstream/`, `catalogs/`, golden files and dumps are excluded (CODE_CUSTOM_IGNORE).
+- 3D map of the index: `scripts/map-publish.sh` exports the vectors (PCA to 3D) and publishes them to GitHub Pages (repo `codemap`).

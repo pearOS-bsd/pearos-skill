@@ -27,7 +27,7 @@ You are continuing a long project. Do not start from zero and do not reinvent: e
 | `bringup-log.md` | the long log of everything learned while bringing Mac programs up (read the part you need; it is long) |
 
 ## Commands (also in `commands/`)
-`/work [task]` overnight loop · `/status` · `/sync` clone/pull all repos · `/vm` start/check the VMs · `/night` set up the usage-limit watchdog · `/apple <question>` find Apple's real behaviour · `/audit` licence audit · `/docs` update docs and this skill.
+`/index` index + wait for sync · `/work [task]` overnight loop · `/status` · `/sync` clone/pull all repos · `/vm` start/check the VMs · `/night` set up the usage-limit watchdog · `/apple <question>` find Apple's real behaviour · `/audit` licence audit · `/docs` update docs and this skill.
 
 ## Two sentences that matter most
 Before building anything: **search whether it already exists** (our repos, GitHub, Apple's open source, ravynOS, NextBSD, Cocotron ...).
