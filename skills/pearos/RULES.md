@@ -20,6 +20,7 @@
 
 ## The code index (Qdrant MCP, `TOOLS.md`)
 16. **Before writing any utility function, wrapper or new component, you MUST search the codebase index** (`mcp__qdrant__search_code` / `contextual_search`, over every repository in ~/pearOS and the `upstream/` code if indexed separately) for a similar implementation that already exists in ANY repo/project. Reuse or adapt it; if you write new code anyway, say in the commit/doc which candidates you found and why they did not fit. Plain `grep` is not a substitute: the index finds the same idea under another name.
+16a. To search every repository at once: `python3 scripts/qdrant-search.py "what you want" -n 8` (the MCP `search_code` searches one path only).
 16b. Search in **three** ways, not one: the vector index (ideas), `scripts/where-is.sh <name>` (exact names, ctags), and `DEPENDENCIES.md` (which layer may own the code). Vectors are weak on exact identifiers and blind to dependency direction.
 17. **The index lags behind the files.** Indexing is slow (~2.4 chunks/s on CPU) and Qdrant optimises in the background. After you change a project run `python3 scripts/qdrant-wait.py <repo>` (runs `reindex_changes`, waits until the collections are green and stable) **before** relying on a search about the code you just wrote; an empty result right after an edit proves nothing. Re-index after pulling other people's changes too (`/index`). The 3D code map is republished after a sync.
 
