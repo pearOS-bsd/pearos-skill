@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pearOS code map</title>
+<style>
+:root{--bg:#0b0d12;--fg:#e8eaf0;--mut:#8b93a7;--pan:#141822cc;--line:#252b3a}
+@media (prefers-color-scheme: light){:root{--bg:#f4f5f8;--fg:#14161c;--mut:#5b6377;--pan:#ffffffd9;--line:#d5d9e3}}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+#c{position:fixed;inset:0}
+.panel{position:fixed;background:var(--pan);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+#top{top:12px;left:12px;width:min(340px,calc(100vw - 48px))}
+#top h1{font-size:16px;margin:0 0 4px}#top p{margin:0 0 8px;color:var(--mut);font-size:12px}
+#q{width:100%;box-sizing:border-box;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg)}
+#legend{top:12px;right:12px;max-height:calc(100vh - 140px);overflow:auto;min-width:170px}
+#legend label{display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;font-size:12px}
+#legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+#tip{bottom:12px;left:12px;max-width:min(560px,calc(100vw - 48px));font:12px ui-monospace,monospace;display:none;white-space:pre-wrap}
+#stat{bottom:12px;right:12px;font-size:12px;color:var(--mut)}
+.row{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:12px;color:var(--mut)}
+@media (max-width:640px){#legend{top:auto;bottom:70px;max-height:30vh}}
+</style></head><body>
+<div id="c"></div>
+<div class="panel" id="top"><h1>pearOS code map</h1><p>Every chunk of code of every repository, placed by meaning (768-d embeddings → 3D). Close = similar idea. Drag to rotate, wheel to zoom.</p>
+<input id="q" placeholder="filter: path or text…"><div class="row"><label><input type="checkbox" id="lk" checked> similar code in different repos (lines)</label></div></div>
+<div class="panel" id="legend"></div><div class="panel" id="tip"></div><div class="panel" id="stat">loading…</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three'; import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const el=document.getElementById('c'),R=new THREE.WebGLRenderer({antialias:true}); R.setPixelRatio(devicePixelRatio); R.setSize(innerWidth,innerHeight); el.appendChild(R.domElement);
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.01,100); C.position.set(0,0,2.2);
+const ctl=new OrbitControls(C,R.domElement); ctl.enableDamping=true; ctl.autoRotate=true; ctl.autoRotateSpeed=.4; ctl.addEventListener('start',()=>ctl.autoRotate=false);
+let D=null,pts=null,lines=null,vis=[],hid=new Set(),colors=[];
+const hue=i=>new THREE.Color().setHSL((i*0.61803)%1,.7,.58);
+function build(d){
+  if(pts){S.remove(pts);pts.geometry.dispose()} if(lines){S.remove(lines);lines.geometry.dispose()}
+  D=d; const n=d.x.length,pos=new Float32Array(n*3),col=new Float32Array(n*3); colors=d.repos.map((_,i)=>hue(i));
+  for(let i=0;i<n;i++){pos.set([d.x[i],d.y[i],d.z[i]],i*3); const c=colors[d.r[i]]; col.set([c.r,c.g,c.b],i*3)}
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3)); g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  pts=new THREE.Points(g,new THREE.PointsMaterial({size:.012,vertexColors:true,sizeAttenuation:true,transparent:true,opacity:.9})); S.add(pts);
+  const lp=[]; for(const [a,b] of d.links){lp.push(d.x[a],d.y[a],d.z[a],d.x[b],d.y[b],d.z[b])}
+  const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(lp,3));
+  lines=new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0xffc857,transparent:true,opacity:.35})); lines.visible=document.getElementById('lk').checked; S.add(lines);
+  const L=document.getElementById('legend'); L.innerHTML=''; const cnt={}; d.r.forEach(r=>cnt[r]=(cnt[r]||0)+1);
+  d.repos.forEach((r,i)=>{const l=document.createElement('label'),cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!hid.has(i); cb.onchange=()=>{cb.checked?hid.delete(i):hid.add(i);refilter()};
+    l.append(cb); l.insertAdjacentHTML('beforeend','<i style="background:#'+colors[i].getHexString()+'"></i>'+r+' <span style="color:var(--mut)">'+cnt[i]+'</span>'); L.append(l)});
+  document.getElementById('stat').textContent=n+' chunks · '+d.repos.length+' repos · '+d.links.length+' cross-repo similarities · updated '+new Date(d.updated*1000).toLocaleString(); refilter();
+}
+function refilter(){ if(!D)return; const q=document.getElementById('q').value.toLowerCase(),n=D.x.length,a=pts.geometry.attributes.color; vis=new Array(n);
+  for(let i=0;i<n;i++){const ok=!hid.has(D.r[i])&&(!q||D.files[D.f[i]].toLowerCase().includes(q)||D.t[i].toLowerCase().includes(q)); vis[i]=ok; const c=colors[D.r[i]]; const k=ok?1:.04; a.setXYZ(i,c.r*k,c.g*k,c.b*k)} a.needsUpdate=true }
+document.getElementById('q').oninput=refilter; document.getElementById('lk').onchange=e=>{if(lines)lines.visible=e.target.checked};
+const ray=new THREE.Raycaster(); ray.params.Points.threshold=.015; const m=new THREE.Vector2(),tip=document.getElementById('tip');
+R.domElement.addEventListener('pointermove',e=>{ if(!pts)return; m.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1); ray.setFromCamera(m,C);
+  const h=ray.intersectObject(pts).find(x=>vis[x.index]); if(!h){tip.style.display='none';return} const i=h.index;
+  tip.style.display='block'; tip.textContent=D.repos[D.r[i]]+' / '+D.files[D.f[i]].split('/').slice(1).join('/')+'  lines '+D.l[i]+'–'+D.e[i]+'\n'+D.t[i]});
+async function load(){ try{const r=await fetch('points.json?t='+Date.now(),{cache:'no-store'}); const d=await r.json(); if(!D||d.updated!==D.updated) build(d)}catch(e){document.getElementById('stat').textContent='no data yet'} }
+load(); setInterval(load,60000);
+addEventListener('resize',()=>{C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+(function loop(){requestAnimationFrame(loop);ctl.update();R.render(S,C)})();
+</script></body></html>

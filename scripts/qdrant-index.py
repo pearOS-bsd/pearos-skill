@@ -9,7 +9,7 @@ HOME=os.path.expanduser('~'); PEAR=os.environ.get('PEAR_DIR',HOME+'/pearOS')
 NODE=os.environ.get('NODE_BIN') or (sorted(glob.glob(HOME+'/.nvm/versions/node/v22*/bin/node')) or ['node'])[-1]
 SERVER=HOME+'/.pear/qdrant-mcp-server/build/index.js'
 ENV=dict(os.environ,EMBEDDING_PROVIDER='ollama',EMBEDDING_MODEL='unclemusclez/jina-embeddings-v2-base-code',QDRANT_URL='http://localhost:6333',LOG_LEVEL='error',CODE_BATCH_SIZE=os.environ.get('CODE_BATCH_SIZE','8'),EMBEDDING_RETRY_ATTEMPTS='5',
-  CODE_CUSTOM_IGNORE=os.environ.get('CODE_CUSTOM_IGNORE','upstream/**,catalogs/**,**/*.car,**/*.otool-ov.txt,**/*.objc.txt,**/*.dyld_info-objc.txt,docs/golden/**,**/golden/**,**/build/**'),
+  CODE_CUSTOM_IGNORE=os.environ.get('CODE_CUSTOM_IGNORE','upstream/**,catalogs/**,**/*.car,**/*_Generated.*,iso/manifest/**,**/*.txt,**/*.json,**/golden/**,**/*golden*,**/sls_generic.c,**/sls_blobs.c,**/sls_harvest.c,**/sls_hotkey_defaults.c,**/macprobe-out/**,**/build/**,**/test/ref/**,docs/golden/**,**/*.o,**/*.ko,**/*.dylib,**/*.a,**/obj/**'),
   CODE_CUSTOM_EXTENSIONS=os.environ.get('CODE_CUSTOM_EXTENSIONS','.m,.mm,.inc,.tbd,.plist,.sh,.py,.md'))
 class MCP:
     def __init__(s):
