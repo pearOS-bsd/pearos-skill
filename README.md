@@ -26,5 +26,5 @@ Plugin alternative: `/plugin marketplace add pearOS-bsd/pearos-skill` then `/plu
 `skills/pearos/`: `SKILL.md` (entry), `PROJECT.md` (every repository), `STATE.md` (done/next/decisions — updated all the time), `RULES.md`, `MACHINE.md`, `TOOLS.md`, `WORKFLOW.md`, `APPLE.md`, `bringup-log.md`.
 `commands/`, `scripts/` (`install.sh clone-all.sh night.sh search-first.sh vm-up.sh vm-status.sh`), `vms/freebsd/` (VM start scripts and cloud-init templates).
 
-Secrets (sudo password, keys) live in `~/.pear/` on each machine and are **never** committed.
+The sudo password of the development laptop is in `skills/pearos/MACHINE.md` on purpose (nothing personal on those machines). SSH private keys are never committed.
 Licence: BSD-2-Clause.

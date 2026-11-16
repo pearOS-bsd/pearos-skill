@@ -1,0 +1,9 @@
+#!/bin/sh
+# Strips every trace of Claude / Anthropic from a commit message (trailers, "generated with", session URLs). Installed globally by scripts/install.sh (core.hooksPath).
+f="$1"; python3 - "$f" <<'PY'
+import sys,re
+p=sys.argv[1]; m=open(p,errors='ignore').read()
+bad=re.compile(r'^\s*(co-authored-by:.*(claude|anthropic).*|claude-session:.*|.*claude\.ai/code.*|.*generated (with|by).*claude.*|.*noreply@anthropic\.com.*)$',re.I)
+out='\n'.join(l for l in m.split('\n') if not bad.match(l)).rstrip('\n')+'\n'
+open(p,'w').write(out)
+PY
