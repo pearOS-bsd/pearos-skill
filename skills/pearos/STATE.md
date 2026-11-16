@@ -37,4 +37,5 @@ ACTIVE: none
 - Sudo password of the Linux dev laptop is `pear`, written in the (public) repo on purpose. Headless overnight runs use `--dangerously-skip-permissions`. Caveman = the JuliusBrussee/caveman skill. REA is installed by its own guide. The other laptop may or may not have the VMs: ask when missing.
 
 ## Questions for the user
+- **Mac VM screen is LOCKED** (CGSSessionScreenIsLocked=1; screenshots are plain grey). Please unlock it once (password `pear`). I set askForPassword=0, screensaver idleTime=0, pmset displaysleep/sleep=0 so it should stay unlocked. Needed to check what the Dock window draws (screencapture over ssh works since 2026-11-16).
 - (none open) The AMFI boot-arg for the Dock replacement is a change to the Mac VM's boot config: do it only when the trace stage is done.
