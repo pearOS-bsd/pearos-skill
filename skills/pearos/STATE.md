@@ -29,7 +29,7 @@ ACTIVE: none
 - `CoreGlyphs` (SF Symbols 105 MB Assets.car): set aside, the user handles it on 2026-11-17.
 
 ## Decisions taken
-- **Dock target (user, 2026-11-16):** our own Dock, indistinguishable from the real one under trace (services, files, prefs, notifications, SLS requests) AND able to replace the real Dock on a real macOS. Plan/blockers: `docs/development/DOCK-REPLACEMENT.md`. `apps/dock` (GNUstep/ws_*) is legacy until a Cocoa-API Dock passes the trace diff. Needs from the user: root on the Mac VM (password or NOPASSWD) for dtrace/fs_usage and the AMFI boot-arg.
+- **Dock target (user, 2026-11-16):** our own Dock, indistinguishable from the real one under trace (services, files, prefs, notifications, SLS requests) AND able to replace the real Dock on a real macOS. Plan/blockers: `docs/development/DOCK-REPLACEMENT.md`. `apps/dock` (GNUstep/ws_*) is legacy until a Cocoa-API Dock passes the trace diff. Root on the Mac VM: `sudo` with `pear` works (dtrace/fs_usage/nvram).
 - Final licence: BSD-2-Clause (holder text "pearOS-bsd contributors", changeable). GPL/LGPL code is not copied; GNUstep libs are LGPL (checked on sources: base/gui/back/corebase/opal/quartzcore), dynamic linking only; APSL files stay APSL; Apple binaries never distributed.
 - `.car` files in CoreUI are public: the user says they were recreated, not Apple's originals — leave as is.
 - SystemUIServer is an app (lives in `apps/topbar`), no own repo; Dock/Finder/loginwindow also in `apps`.
@@ -37,4 +37,4 @@ ACTIVE: none
 - Sudo password of the Linux dev laptop is `pear`, written in the (public) repo on purpose. Headless overnight runs use `--dangerously-skip-permissions`. Caveman = the JuliusBrussee/caveman skill. REA is installed by its own guide. The other laptop may or may not have the VMs: ask when missing.
 
 ## Questions for the user
-- Mac VM: the `alex` sudo password (or a NOPASSWD sudoers line) for dtrace/fs_usage and `amfi_get_out_of_my_way` (needed for the Dock replacement with private entitlements).
+- (none open) The AMFI boot-arg for the Dock replacement is a change to the Mac VM's boot config: do it only when the trace stage is done.
