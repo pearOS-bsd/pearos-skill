@@ -1,0 +1,11 @@
+{
+  "name": "pearos-skill",
+  "owner": { "name": "pearOS-bsd" },
+  "plugins": [
+    {
+      "name": "pearos",
+      "source": "./",
+      "description": "pearOS BSD project skill: knowledge, rules, /work overnight loop, VM and Apple-behaviour helpers."
+    }
+  ]
+}

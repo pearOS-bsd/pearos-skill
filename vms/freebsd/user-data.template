@@ -1,0 +1,10 @@
+#cloud-config
+ssh_pwauth: false
+users:
+  - name: root
+    ssh_authorized_keys:
+      - ssh-ed25519 PUT_YOUR_PUBLIC_KEY_HERE
+disable_root: false
+growpart:
+  mode: auto
+  devices: ['/']
