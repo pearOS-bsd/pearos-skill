@@ -6,7 +6,7 @@
 3. Temporary files go in `$CLAUDE_JOB_DIR/tmp` (or `~/.pear/tmp`), never in `/tmp` shared paths and never in a repository.
 
 ## Licences (see docs/development/LICENSES.md)
-4. Our code is **BSD-2-Clause**. Copy code from other projects only if the licence allows (MIT/BSD/ISC/Apache/APSL) into `upstream/` with licence files kept and `PROVENANCE.md` updated. **Never copy GPL / LGPL code** (Darling, GNUstep): read it only.
+4. Our code is **BSD-2-Clause**. Code from other projects whose licence allows it (MIT/BSD/ISC/Apache/APSL) is **meant to be used**: copy it to `upstream/` (pristine, `PROVENANCE.md`) and **adapt the files we need into `src/` of the owning layer**, keeping every licence header and adding `Modified for pearOS: ...` (process, verdicts and exclusions: `docs/development/UPSTREAM-INTEGRATION.md`; check a file's header before moving it, files without a header are not moved until the licence is established). **Never merge GPL / LGPL code** (Darling, GNUstep, FreeType's GPL option, autoconf/gettext scripts, GPL files of NSS: choose MPL there): read it only.
 5. **Never put Apple files in a repository** (dyld cache, system binaries, frameworks). They stay on the VMs / the user's Mac and are fetched by `macdeps`. Decompile **outputs we write ourselves** (notes, numbers) are fine; raw dumps need a second thought — ask.
 6. Run `iso/licenses/audit.sh` before anything that goes into the image. No GPL library may be loaded by a shipped binary.
 
