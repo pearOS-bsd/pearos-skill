@@ -18,7 +18,7 @@ NODE=$(ls "$HOME"/.nvm/versions/node/v22*/bin/node 2>/dev/null | tail -1); [ -n 
 if command -v claude >/dev/null 2>&1; then
 	claude mcp remove qdrant >/dev/null 2>&1 || true
 	claude mcp add --scope user qdrant -e EMBEDDING_PROVIDER=ollama -e EMBEDDING_MODEL=unclemusclez/jina-embeddings-v2-base-code -e QDRANT_URL=http://localhost:6333 -e CODE_BATCH_SIZE=8 -e EMBEDDING_RETRY_ATTEMPTS=5 \
-		-e "CODE_CUSTOM_IGNORE=upstream/**,catalogs/**,**/*.car,**/*.otool-ov.txt,**/*.objc.txt,**/*.dyld_info-objc.txt,docs/golden/**,**/golden/**,**/build/**" -e "CODE_CUSTOM_EXTENSIONS=.m,.mm,.inc,.tbd,.plist,.sh,.py,.md" \
+		-e "CODE_CUSTOM_IGNORE=upstream/**,catalogs/**,**/*.car,**/*_Generated.*,iso/manifest/**,**/*.txt,**/*.json,**/golden/**,**/*golden*,**/sls_generic.c,**/sls_blobs.c,**/sls_harvest.c,**/sls_hotkey_defaults.c,**/macprobe-out/**,**/build/**,**/test/ref/**,docs/golden/**,**/*.o,**/*.ko,**/*.dylib,**/*.a,**/obj/**" -e "CODE_CUSTOM_EXTENSIONS=.m,.mm,.inc,.tbd,.plist,.sh,.py,.md" \
 		-- "$NODE" "$HOME/.pear/qdrant-mcp-server/build/index.js"
 fi
 echo "ready: Qdrant http://localhost:6333, Ollama, MCP 'qdrant'.  Index everything:  python3 scripts/qdrant-index.py   (about 2 hours on CPU the first time)"

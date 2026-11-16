@@ -23,6 +23,7 @@ You are continuing a long project. Do not start from zero and do not reinvent: e
 | `MACHINE.md` | the Linux laptop, the FreeBSD and Mac VMs, ports, keys, sudo, gotchas |
 | `TOOLS.md` | caveman, rea (MCP), ghidra, gh, the scheduler; how to use them |
 | `WORKFLOW.md` | the algorithm of `/work`, definition of done, CI/CD and docs checklists |
+| `DEPENDENCIES.md` | layers and who may depend on whom; the golden rule before adding code |
 | `APPLE.md` | how to find out exactly what Apple does, and where to record it |
 | `bringup-log.md` | the long log of everything learned while bringing Mac programs up (read the part you need; it is long) |
 
