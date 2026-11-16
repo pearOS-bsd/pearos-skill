@@ -34,3 +34,4 @@
 3. In the VM: `pkg install git gmake python3 llvm21 ...`, `git clone https://github.com/pearOS-bsd/darwinator`, build the module against `/usr/src/sys` (`make SYSDIR=...`), `kldload`. Daemons: build `d/darwin` (`sh darwin/build.sh`) and copy to `/root/dnew/<name>/` (the session scripts expect that).
 4. Mac VM: OSX-KVM (github.com/kholia/OSX-KVM) with the user's own macOS install (`fetch-macOS-v2.py`), ssh forward 2229, user `alex`. Apple files come from it via `macdeps`.
 5. Ask the user for anything missing (keys, passwords): never invent.
+- **dtrace gotcha**: `dtrace -o FILE` APPENDS and /tmp files made by root cannot be removed by `alex`; a failed script leaves the old file. Use a fresh file per run, `sudo rm` it, check the line count (research/dock-trace scripts do). `fs_usage` does not start on the Mac VM.
