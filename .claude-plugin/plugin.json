@@ -1,0 +1,8 @@
+{
+  "name": "pearos",
+  "description": "pearOS BSD: project memory, rules, tools and the /work overnight loop for Claude Code, so a session on any laptop starts at full speed.",
+  "version": "0.1.0",
+  "author": { "name": "pearOS-bsd" },
+  "homepage": "https://github.com/pearOS-bsd/pearos-skill",
+  "license": "BSD-2-Clause"
+}
