@@ -6,6 +6,15 @@
 HERE="$(cd "$(dirname "$0")/.." && pwd)"; mkdir -p "$HOME/.claude/skills" "$HOME/.claude/commands" "$HOME/.pear"
 ln -sfn "$HERE/skills/pearos" "$HOME/.claude/skills/pearos"
 for c in "$HERE"/commands/*.md; do ln -sf "$c" "$HOME/.claude/commands/$(basename "$c")"; done
+# always-on summary: a marked block in ~/.claude/CLAUDE.md (every session) and in ~/pearOS/CLAUDE.md (sessions started there); the skill keeps the procedures
+put_block() { f="$1"; mkdir -p "$(dirname "$f")"; touch "$f"; python3 - "$f" "$HERE/claude-md/pearos.md" <<'PY'
+import sys,re
+f,src=sys.argv[1:]; t=open(f).read(); b='<!-- pearos:begin -->\n'+open(src).read().rstrip()+'\n<!-- pearos:end -->\n'
+t=re.sub(r'<!-- pearos:begin -->.*?<!-- pearos:end -->\n?',b,t,flags=re.S) if '<!-- pearos:begin -->' in t else (t.rstrip('\n')+'\n\n' if t.strip() else '')+b
+open(f,'w').write(t)
+PY
+}
+put_block "$HOME/.claude/CLAUDE.md"; put_block "$HOME/pearOS/CLAUDE.md"
 # git: strip every trace of Claude from commit messages, in every repository of this laptop
 mkdir -p "$HOME/.pear/githooks"; cp "$HERE/scripts/githooks/commit-msg" "$HOME/.pear/githooks/commit-msg"; chmod +x "$HOME/.pear/githooks/commit-msg"
 [ -z "$(git config --global core.hooksPath)" ] && git config --global core.hooksPath "$HOME/.pear/githooks" && echo "git hooks: commit-msg guard installed"

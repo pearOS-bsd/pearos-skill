@@ -23,6 +23,9 @@
 16b. Search in **three** ways, not one: the vector index (ideas), `scripts/where-is.sh <name>` (exact names, ctags), and `DEPENDENCIES.md` (which layer may own the code). Vectors are weak on exact identifiers and blind to dependency direction.
 17. **The index lags behind the files.** Indexing is slow (~2.4 chunks/s on CPU) and Qdrant optimises in the background. After you change a project run `python3 scripts/qdrant-wait.py <repo>` (runs `reindex_changes`, waits until the collections are green and stable) **before** relying on a search about the code you just wrote; an empty result right after an edit proves nothing. Re-index after pulling other people's changes too (`/index`). The 3D code map is republished after a sync.
 
+## Keeping the always-on summary right
+18. The essentials (layers, the dependency rule, the never-forget rules) also live in `claude-md/pearos.md`, copied by `scripts/install.sh` into `~/.claude/CLAUDE.md` and `~/pearOS/CLAUDE.md` as a marked block, so they are in context in every session even when this skill is not invoked. When you change layers, repositories or rules: update `claude-md/pearos.md` and `DEPENDENCIES.md` together, run `sh scripts/install.sh` (or only the block step), commit.
+
 ## Talking
 13. The user speaks **Romanian**: answer in Romanian, short and concrete. Code, commits, docs and READMEs in English (simple words in public-facing text).
 14. Use **caveman** mode for long autonomous work to save tokens (see TOOLS.md) — never in commit messages, docs, code or when explaining a decision to the user.
