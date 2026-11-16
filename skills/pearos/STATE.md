@@ -24,6 +24,9 @@ ACTIVE: none
 6. **Cache of our own** (docs/development/CACHE-LIBRARIES.md): start with libsystem family, libdispatch, libobjc (all open at Apple).
 7. Move leftovers: `research` raw dumps policy, retire GNUstep-era code (`AppKit/back-wsd`, most of `SDK/src`, `iso/ci/gnustep-*.sh`, `ports/`).
 
+## Solarium (Liquid Glass) repository (2026-11-16, user's request: implement it exactly like Apple, with REA)
+`github.com/pearOS-bsd/Solarium` created: README with the map of where Liquid Glass lives in macOS 26.7.2 (QuartzCore `CASDFGlassDisplacementEffect` / `CASDFGlassHighlightEffect`; AppKit `NSGlassEffectView` family, `_NSSolarium`, `_NSLiquidMorph`; DesignLibrary `GlassMaterialProvider`; SwiftUICore; CoreImage `CIGlassLozenge`, `CIGlassDistortion`), plan, `tools/list-glass-classes.m`. Nothing implemented. The material's defaults come from the pearOS Arch settings (the user says they were calibrated to match macOS); the Better Blur fork there is GPL-3 and is NOT copied. Next: extract thin slices of QuartzCore / AppKit / DesignLibrary from the Mac (macdeps), read the classes and the Metal shader names with REA, fill docs/APPLE-DECISIONS.md.
+
 ## Known gaps raised by others (Discord, 2026-11-16)
 - **Solarium = the codename of Liquid Glass (macOS 26)**: nothing in our code (only names in generated stubs: IconServices `isSolariumEnabled`). There is no `Solarium.framework` on the 26.7.2 disk; where the glass is implemented (AppKit / SwiftUICore / QuartzCore / RenderBox in the dyld cache) is not investigated. Needs a Metal layer or our own blur/refraction in wsd.
 - **CoreAudio / AudioToolbox**: missing. `dyld/machrun/shims.c` only answers "file type not supported" so programs try another decoder. Nothing plays or records. Would be a HAL over FreeBSD sound(4)/sndio plus coreaudiod; not planned yet. The real Dock links AudioToolbox (system sounds).
