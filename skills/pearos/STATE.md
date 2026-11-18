@@ -51,3 +51,5 @@ Reference captures: `Solarium/tools/glass-probe` (macOS 26 app, user's friend ru
 ## Questions for the user
 - (done) Mac VM screen was locked; the user unlocked it 2026-11-16 and the lock is disabled. Old note: **Mac VM screen is LOCKED** (CGSSessionScreenIsLocked=1; screenshots are plain grey). Please unlock it once (password `pear`). I set askForPassword=0, screensaver idleTime=0, pmset displaysleep/sleep=0 so it should stay unlocked. Needed to check what the Dock window draws (screencapture over ssh works since 2026-11-16).
 - (none open) The AMFI boot-arg for the Dock replacement is a change to the Mac VM's boot config: do it only when the trace stage is done.
+
+- 2026-11-18: REAL DYLD WORKS in the ISO test VM: Mac dyld + cache disk, `two_volumes=2`, `fast_sleep_ms=5`; Mac echo/date, FreeBSD-built C/ObjC programs run; `dlopen(/open/AppKit)` ok, 251 classes (open/build-appkit-bsd.sh 239/239). Next: build /open/Cocoa + stubs, ship /open + dyld + cache path in iso/build.sh, open a window via WindowServer; then Liquid Glass steps 3-6; then codemap restyle.
