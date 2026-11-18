@@ -5,13 +5,13 @@ Homepage: `pearOS-bsd/.github` (profile README).  Docs: `pearOS-bsd/docs` (`deve
 
 ## How it works (the picture)
 ```
-Mac app ──open──> our AppKit (/open/AppKit) ──SkyLight──> WindowServer (wsd) ──> FreeBSD (DRM/KMS, evdev)
+Mac app ──open──> our AppKit (/open/AppKit) ──SkyLight──> WindowServer (WindowServer) ──> FreeBSD (DRM/KMS, evdev)
    │                    │                                      ▲
    │             real Foundation, CoreFoundation, libSystem... from the Mac's dyld shared cache (taken from the USER'S OWN Mac by macdeps; never distributed)
    └── runs through the real dyld on the FreeBSD kernel module darwinator (Mach-O loader, syscalls, Mach IPC, workqueues, kqueue)
-daemons (d): launchd, notifyd, wsbridge (Mac client lib <-> wsd), lsd (LaunchServices), carender (CA render), hid, wm ...
+daemons (d): launchd, notifyd, wsbridge (Mac client lib <-> WindowServer), lsd (LaunchServices), carender (CA render), hid, wm ...
 ```
-- Mac programs run **unmodified** (Mach-O) on `darwinator` + the **real dyld** (from the Mac); **AppKit is ours** (written back class by class); the window server **wsd** speaks the real **SkyLight** protocol.
+- Mac programs run **unmodified** (Mach-O) on `darwinator` + the **real dyld** (from the Mac); **AppKit is ours** (written back class by class); the window server **WindowServer** speaks the real **SkyLight** protocol.
 - Older, GNUstep-based path (GNUstep + Opal + our `back-wsd`) still exists for native apps; it is being retired (it also loads GPL libraries through FFmpeg: see STATE.md).
 
 ## Repositories (github.com/pearOS-bsd/<name>)
@@ -26,7 +26,7 @@ daemons (d): launchd, notifyd, wsbridge (Mac client lib <-> wsd), lsd (LaunchSer
 **Graphics / UI**
 | repo | what |
 |---|---|
-| `WindowServer` | **wsd**: compositor (sw/GL), backends (KMS/fb/headless), input (evdev, touchpad, xkb), IPC, client lib (`libwsclient`), test tools (`wsshot wsclick wskey wsdrag wsmove wswins wsshow wscarender ...`), tests, CI |
+| `WindowServer` | **WindowServer**: compositor (sw/GL), backends (KMS/fb/headless), input (evdev, touchpad, xkb), IPC, client lib (`libwsclient`), test tools (`wsshot wsclick wskey wsdrag wsmove wswins wsshow wscarender ...`), tests, CI |
 | `SkyLight` | the SkyLight protocol: wire headers, ~200 server handlers (`server/sls_*.c`), client shim, generators, specs |
 | `AppKit` | our AppKit: ~258 classes written back from the decompile + the backend `Open*.m` (windows, events, text, nib loader, documents, menus, panels, colours, theme); tools/ |
 | `open` | `open App.app` launcher, `open-patch.py` (rewrites load commands), stub generator, `deploy.sh` (build on Mac VM, install on FreeBSD VM), `build-appkit.sh` |
