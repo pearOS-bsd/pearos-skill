@@ -1,6 +1,6 @@
 # State of the project (update at every milestone; last: 2026-11-16)
 
-ACTIVE: ControlCenter replacement (started 2026-11-18): apps/controlcenter-cocoa skeleton matches the real one in XPC (59/59) + look-ups (13/13); next = SkyLight status-bar windows + panel, PREF keys; docs/development/CONTROLCENTER-REPLACEMENT.md, research/cc-trace (cc-switch.sh ours|real|stop).
+ACTIVE: ControlCenter replacement (started 2026-11-18): `apps/controlcenter-cocoa` runs on the Mac VM in place of the real one (XPC 59/59, panel, Edit Controls + gallery, pages, menu-bar extras, Focus real); docs/development/CONTROLCENTER-REPLACEMENT.md, research/cc-trace (cc-switch.sh ours|real|stop, deploy-ours.sh). **Owner's decision 2026-11-18: do NOT implement more backends in the app: the frameworks get their own repositories** `CoreAudio DisplayServices IOPS CoreWLAN IOBluetooth DoNotDisturb` (created, README only; next = implement them one by one, FreeBSD backends in each README; `apps/controlcenter-cocoa/CCPlatform.c` is temporary). **Open requirement (owner):** Dark Mode must write exactly where the real Control Center writes, through SkyLight (see CONTROLCENTER-REPLACEMENT.md "Dark Mode": today ours calls SLSSetAppearanceThemeLegacy only, the real path is not traced yet).
 
 ## Done (highlights)
 - Mac programs run on FreeBSD: `darwinator` (module) + real dyld; real Dock + real IconServices icons draw on wsd; real Finder alive (details: bringup-log.md).

@@ -6,8 +6,8 @@ A lower layer never depends on a higher one. Put new code in the **lowest layer 
 |---|---|---|
 | **0 kernel / ABI** | Mach IPC, syscalls, workqueues, kqueue, IORegistry on FreeBSD | `darwinator`, `IOKit` (user side) |
 | **1 runtime & loader** | dyld, libSystem family, Objective-C runtime, GCD, C++ runtime, XPC | `dyld`, `macdeps`, `libsystem`, `libdispatch`, `libobjc`, `libcxx`, `libxpc`, `swift-runtime`, `thirdparty` |
-| **2 core frameworks** | CoreFoundation, Foundation, CoreGraphics, CoreText, ImageIO, Security, SystemConfiguration, CFNetwork, CoreServices | `CoreFoundation`, `Foundation`, `CoreGraphics`, `CoreText`, `ImageIO`, `Security`, `SystemConfiguration`, `CFNetwork`, `CoreServices`, `IconServices`, `LaunchServices`, `CoreUI`, `SDK` |
-| **3 UI & windowing** | the window protocol and server, animation, the toolkit, the launcher | `SkyLight` → `WindowServer`, `QuartzCore`, `Solarium` (Liquid Glass, above QuartzCore, below AppKit), `UIFoundation`, `HIToolbox`, `AppKit`, `open` |
+| **2 core frameworks** | `CoreAudio`, `IOPS`, `CoreWLAN`, `IOBluetooth`, `DoNotDisturb` (planned, 2026-11-18; the Control Center's backends), CoreFoundation, Foundation, CoreGraphics, CoreText, ImageIO, Security, SystemConfiguration, CFNetwork, CoreServices | `CoreFoundation`, `Foundation`, `CoreGraphics`, `CoreText`, `ImageIO`, `Security`, `SystemConfiguration`, `CFNetwork`, `CoreServices`, `IconServices`, `LaunchServices`, `CoreUI`, `SDK` |
+| **3 UI & windowing** | `DisplayServices` (private, brightness; planned, 2026-11-18), the window protocol and server, animation, the toolkit, the launcher | `SkyLight` → `WindowServer`, `QuartzCore`, `Solarium` (Liquid Glass, above QuartzCore, below AppKit), `UIFoundation`, `HIToolbox`, `AppKit`, `open` |
 | **4 daemons & apps** | services and programs on top | `d` (launchd, notifyd, wsbridge, lsd ...), `apps` (Dock, Finder, topbar, loginwindow, Terminal, TextEdit) |
 | tooling | build, tests, docs, research | `iso`, `tests`, `docs`, `research`, `pearos-skill`, `codemap` |
 
