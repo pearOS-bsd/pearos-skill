@@ -9,8 +9,8 @@
 - FreeBSD 14.5 amd64 under QEMU/KVM, files in `~/fbsd-vm/` (`disk.qcow2`, `overlay.qcow2`, `start-gl.sh` = virgl GPU no window, `start-gui.sh`, `start-2d-show.sh`, key `id_ed25519`).
 - `ssh -p 2222 -i ~/fbsd-vm/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost` (cloud-init, key only).
 - `kldload /root/darwinator/darwinator.ko` is needed after a reboot; sysctls: `kern.darwinator.dyld=1 kern.darwinator.two_volumes=2 kern.darwinator.fast_sleep_ms=5` (the stack scripts set them).
-- Window server: `wsd -t -s /tmp/wsd.sock` (headless, 1280x800). Test tools need `WS_SOCKET=/tmp/wsd.sock`: `wsshot out.ppm`, `wswins`, `wsclick x y`, `wskey code...` (`+cmd` modifiers), `wsmove`, `wsdrag`; convert with `ppm2png.py` (research/tools).
-- Stack (real Dock/Finder): `d/session/pearos-desktop.sh`, `/root/run26.sh` (= stack26.sh). **Restart wsd whenever you restart the Dock**, else old tiles stay. The ssh session dies while the stack scripts run (they `pkill`): start with `nohup`, reconnect after ~10 s.
+- Window server: `WindowServer -t -s /tmp/WindowServer.sock` (headless, 1280x800). Test tools need `WS_SOCKET=/tmp/WindowServer.sock`: `wsshot out.ppm`, `wswins`, `wsclick x y`, `wskey code...` (`+cmd` modifiers), `wsmove`, `wsdrag`; convert with `ppm2png.py` (research/tools).
+- Stack (real Dock/Finder): `d/session/pearos-desktop.sh`, `/root/run26.sh` (= stack26.sh). **Restart WindowServer whenever you restart the Dock**, else old tiles stay. The ssh session dies while the stack scripts run (they `pkill`): start with `nohup`, reconnect after ~10 s.
 - Our apps (`open`): `open -a TextEdit file`, `open Stickies.app` (first start after a deploy sometimes shows no window: start again).
 - Services for the GNUstep path: `/root/startbar.sh` (gdomap, gdnc, TopBar, Open and Save Panel Service).
 - Never touch `/dev/sda` on the laptop (a USB stick may be there).
