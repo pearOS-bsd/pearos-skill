@@ -18,6 +18,7 @@ for c in cols:
         for p in r['points']:
             pl=p['payload']; base=os.path.basename(pl.get('codebasePath','').rstrip('/'))
             repo=base[:-5] if base.endswith('-test') else base
+            if not repo or not pl.get('relativePath'): continue  # payload without a repository/file: not a real chunk
             vec.append(p['vector']); meta.append((repo,pl.get('relativePath',''),pl.get('startLine',0),pl.get('endLine',0),(pl.get('content','')[:110]).replace('\n',' ')))
         off=r.get('next_page_offset')
         if off is None: break

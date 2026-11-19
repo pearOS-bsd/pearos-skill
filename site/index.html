@@ -1,58 +1,527 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>pearOS code map</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>pearOS Code Map</title>
+<meta name="description" content="Live 3D graph of the pearOS codebase: layers, repositories, directories and files, with near-duplicate code across repositories.">
+<meta property="og:title" content="pearOS Code Map">
+<meta property="og:description" content="Live 3D graph of the pearOS codebase.">
+<meta property="og:url" content="https://pearos-bsd.github.io/codemap/">
+<meta name="theme-color" content="#05070a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23e6e8eb'/%3E%3Cg stroke='%2305070a' stroke-width='2' fill='none'%3E%3Cpath d='M16 8v6M16 14l-7 9M16 14l7 9M16 14v9'/%3E%3C/g%3E%3Cg fill='%2305070a'%3E%3Ccircle cx='16' cy='8' r='3'/%3E%3Ccircle cx='9' cy='23' r='2.5'/%3E%3Ccircle cx='16' cy='23' r='2.5'/%3E%3Ccircle cx='23' cy='23' r='2.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b0d12;--fg:#e8eaf0;--mut:#8b93a7;--pan:#141822cc;--line:#252b3a}
-@media (prefers-color-scheme: light){:root{--bg:#f4f5f8;--fg:#14161c;--mut:#5b6377;--pan:#ffffffd9;--line:#d5d9e3}}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif;overflow:hidden}
-#c{position:fixed;inset:0}
-.panel{position:fixed;background:var(--pan);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-#top{top:12px;left:12px;width:min(340px,calc(100vw - 48px))}
-#top h1{font-size:16px;margin:0 0 4px}#top p{margin:0 0 8px;color:var(--mut);font-size:12px}
-#q{width:100%;box-sizing:border-box;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg)}
-#legend{top:12px;right:12px;max-height:calc(100vh - 140px);overflow:auto;min-width:170px}
-#legend label{display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;font-size:12px}
-#legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
-#tip{bottom:12px;left:12px;max-width:min(560px,calc(100vw - 48px));font:12px ui-monospace,monospace;display:none;white-space:pre-wrap}
-#stat{bottom:12px;right:12px;font-size:12px;color:var(--mut)}
-.row{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:12px;color:var(--mut)}
-@media (max-width:640px){#legend{top:auto;bottom:70px;max-height:30vh}}
-</style></head><body>
-<div id="c"></div>
-<div class="panel" id="top"><h1>pearOS code map</h1><p>Every chunk of code of every repository, placed by meaning (768-d embeddings → 3D). Close = similar idea. Drag to rotate, wheel to zoom.</p>
-<input id="q" placeholder="filter: path or text…"><div class="row"><label><input type="checkbox" id="lk" checked> similar code in different repos (lines)</label></div></div>
-<div class="panel" id="legend"></div><div class="panel" id="tip"></div><div class="panel" id="stat">loading…</div>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module">
-import * as THREE from 'three'; import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-const el=document.getElementById('c'),R=new THREE.WebGLRenderer({antialias:true}); R.setPixelRatio(devicePixelRatio); R.setSize(innerWidth,innerHeight); el.appendChild(R.domElement);
-const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.01,100); C.position.set(0,0,2.2);
-const ctl=new OrbitControls(C,R.domElement); ctl.enableDamping=true; ctl.autoRotate=true; ctl.autoRotateSpeed=.4; ctl.addEventListener('start',()=>ctl.autoRotate=false);
-let D=null,pts=null,lines=null,vis=[],hid=new Set(),colors=[];
-const hue=i=>new THREE.Color().setHSL((i*0.61803)%1,.7,.58);
-function build(d){
-  if(pts){S.remove(pts);pts.geometry.dispose()} if(lines){S.remove(lines);lines.geometry.dispose()}
-  D=d; const n=d.x.length,pos=new Float32Array(n*3),col=new Float32Array(n*3); colors=d.repos.map((_,i)=>hue(i));
-  for(let i=0;i<n;i++){pos.set([d.x[i],d.y[i],d.z[i]],i*3); const c=colors[d.r[i]]; col.set([c.r,c.g,c.b],i*3)}
-  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3)); g.setAttribute('color',new THREE.BufferAttribute(col,3));
-  pts=new THREE.Points(g,new THREE.PointsMaterial({size:.012,vertexColors:true,sizeAttenuation:true,transparent:true,opacity:.9})); S.add(pts);
-  const lp=[]; for(const [a,b] of d.links){lp.push(d.x[a],d.y[a],d.z[a],d.x[b],d.y[b],d.z[b])}
-  const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute(lp,3));
-  lines=new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0xffc857,transparent:true,opacity:.35})); lines.visible=document.getElementById('lk').checked; S.add(lines);
-  const L=document.getElementById('legend'); L.innerHTML=''; const cnt={}; d.r.forEach(r=>cnt[r]=(cnt[r]||0)+1);
-  d.repos.forEach((r,i)=>{const l=document.createElement('label'),cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!hid.has(i); cb.onchange=()=>{cb.checked?hid.delete(i):hid.add(i);refilter()};
-    l.append(cb); l.insertAdjacentHTML('beforeend','<i style="background:#'+colors[i].getHexString()+'"></i>'+r+' <span style="color:var(--mut)">'+cnt[i]+'</span>'); L.append(l)});
-  document.getElementById('stat').textContent=n+' chunks · '+d.repos.length+' repos · '+d.links.length+' cross-repo similarities · updated '+new Date(d.updated*1000).toLocaleString(); refilter();
+:root{
+  --bg:#05070a;--fg:#e6e8eb;--mut:#9aa1ab;--dim:#646b75;
+  --pan:#0c0e12;--hover:rgba(255,255,255,.045);--press:rgba(255,255,255,.08);
+  --line:#1c2027;--line2:#2a2f38;--acc:#4c8dff;--acc-fg:#fff;--ok:#3fb950;--bad:#f85149;--dup:#e3b341;
+  --shadow:0 1px 2px rgba(0,0,0,.4);--r:8px;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
 }
-function refilter(){ if(!D)return; const q=document.getElementById('q').value.toLowerCase(),n=D.x.length,a=pts.geometry.attributes.color; vis=new Array(n);
-  for(let i=0;i<n;i++){const ok=!hid.has(D.r[i])&&(!q||D.files[D.f[i]].toLowerCase().includes(q)||D.t[i].toLowerCase().includes(q)); vis[i]=ok; const c=colors[D.r[i]]; const k=ok?1:.04; a.setXYZ(i,c.r*k,c.g*k,c.b*k)} a.needsUpdate=true }
-document.getElementById('q').oninput=refilter; document.getElementById('lk').onchange=e=>{if(lines)lines.visible=e.target.checked};
-const ray=new THREE.Raycaster(); ray.params.Points.threshold=.015; const m=new THREE.Vector2(),tip=document.getElementById('tip');
-R.domElement.addEventListener('pointermove',e=>{ if(!pts)return; m.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1); ray.setFromCamera(m,C);
-  const h=ray.intersectObject(pts).find(x=>vis[x.index]); if(!h){tip.style.display='none';return} const i=h.index;
-  tip.style.display='block'; tip.textContent=D.repos[D.r[i]]+' / '+D.files[D.f[i]].split('/').slice(1).join('/')+'  lines '+D.l[i]+'–'+D.e[i]+'\n'+D.t[i]});
-async function load(){ try{const r=await fetch('points.json?t='+Date.now(),{cache:'no-store'}); const d=await r.json(); if(!D||d.updated!==D.updated) build(d)}catch(e){document.getElementById('stat').textContent='no data yet'} }
-load(); setInterval(load,60000);
-addEventListener('resize',()=>{C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
-(function loop(){requestAnimationFrame(loop);ctl.update();R.render(S,C)})();
-</script></body></html>
+:root[data-theme="light"]{
+  --bg:#f5f6f8;--fg:#15181d;--mut:#5a616b;--dim:#8b929c;
+  --pan:#ffffff;--hover:rgba(20,25,35,.045);--press:rgba(20,25,35,.08);
+  --line:#e3e5e9;--line2:#d3d6dc;--acc:#1f6feb;--ok:#1a7f37;--bad:#cf222e;--dup:#9a6700;
+  --shadow:0 1px 2px rgba(20,25,35,.08);color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font:13px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+#stars,#c{position:fixed;inset:0}
+#stars{pointer-events:none}
+#c canvas{display:block;outline:none}
+#c.hovering canvas{cursor:pointer}
+button,input{font:inherit;color:inherit}
+.panel{position:fixed;background:var(--pan);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.mono{font-family:var(--mono)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:5px}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes barIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,185,80,.5)}70%{box-shadow:0 0 0 6px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.enter{animation:rise .35s ease-out both}
+
+/* graph labels */
+#labels{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;font-size:11px;font-weight:500;color:var(--fg);text-shadow:0 0 3px var(--bg),0 0 6px var(--bg);will-change:transform,opacity}
+.lbl.layer{font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--mut)}
+.lbl.root{font-size:13px;font-weight:600}
+.lbl.file{font:10.5px var(--mono)}
+
+/* sidebar */
+#side{top:16px;left:16px;bottom:16px;width:300px;display:flex;flex-direction:column;overflow:hidden}
+.brand{display:flex;align-items:center;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--line)}
+.logo{width:28px;height:28px;border-radius:6px;flex:none;background:var(--fg);color:var(--bg);display:grid;place-items:center}
+.brand h1{font-size:14px;font-weight:600;margin:0}
+.brand p{margin:0;color:var(--mut);font-size:11.5px}
+.search{position:relative;margin:12px 14px 0}
+.search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+#q{width:100%;padding:7px 30px;border-radius:6px;border:1px solid var(--line2);background:transparent;outline:none;transition:border-color .15s}
+#q:focus{border-color:var(--acc)}
+#q::placeholder{color:var(--dim)}
+.kbd{position:absolute;right:7px;top:50%;transform:translateY(-50%);font:10.5px var(--mono);color:var(--dim);border:1px solid var(--line2);border-radius:4px;padding:0 5px;line-height:16px}
+#qinfo{margin:8px 16px 0;font-size:11.5px;color:var(--mut)}
+#qinfo:empty{display:none}
+#hits{margin:4px 8px 0;display:flex;flex-direction:column}
+#hits button{all:unset;display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;cursor:pointer;font:11.5px var(--mono)}
+#hits button:hover,#hits button:focus-visible{background:var(--hover)}
+#hits i,.rrow i,ul.list i{width:8px;height:8px;border-radius:2px;flex:none}
+#hits .p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;direction:rtl;text-align:left}
+#hits .n{color:var(--dim)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:14px 16px 2px}
+.stat{border-left:1px solid var(--line);padding-left:10px}.stat:first-child{border-left:0;padding-left:0}
+.stat b{display:block;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--mut)}
+.sect{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px;font-size:11.5px;font-weight:600;color:var(--mut)}
+.chip{all:unset;cursor:pointer;font-size:11px;font-weight:500;color:var(--mut);padding:1px 6px;border-radius:4px}
+.chip:hover{background:var(--hover);color:var(--fg)}
+#legend{flex:1;overflow:auto;padding:0 8px 10px;scrollbar-width:thin}
+.gh{display:flex;align-items:center;gap:8px;padding:6px 8px;margin-top:2px;border-radius:5px;cursor:pointer;user-select:none}
+.gh:hover{background:var(--hover)}
+.gh .sw{width:3px;height:14px;border-radius:1px;flex:none}
+.gh .t{flex:1;font-weight:600;font-size:12px}
+.gh .t small{color:var(--dim);font-weight:500;margin-right:5px;font-family:var(--mono)}
+.gh .ct{color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums}
+.gh .car{color:var(--dim);transition:transform .2s}
+.grp.closed .car{transform:rotate(-90deg)}
+.rows{display:grid;grid-template-rows:1fr;transition:grid-template-rows .25s ease}
+.grp.closed .rows{grid-template-rows:0fr}
+.rows>div{overflow:hidden}
+.rrow{display:flex;align-items:center;gap:9px;padding:3px 8px 3px 19px;border-radius:5px;cursor:pointer;font-size:12px;transition:opacity .15s}
+.rrow:hover{background:var(--hover)}
+.rrow.off{opacity:.35}
+.rrow .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .ct{color:var(--dim);font-variant-numeric:tabular-nums;font-size:11px}
+.rrow .only{all:unset;font-size:10.5px;color:var(--acc);opacity:0;padding:0 4px}
+.rrow:hover .only,.rrow .only:focus-visible{opacity:1}
+.foot{border-top:1px solid var(--line);padding:9px 16px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--mut)}
+.live{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 2.4s infinite;flex:none}
+.live.down{background:var(--bad);animation:none}
+.foot a{color:var(--mut);text-decoration:none;margin-left:auto}
+.foot a:hover{color:var(--fg)}
+
+/* inspector */
+#insp{top:16px;right:16px;width:380px;max-height:calc(100% - 96px);display:flex;flex-direction:column;overflow:hidden;transition:opacity .2s,transform .25s ease}
+#insp.hide{opacity:0;transform:translateX(12px);pointer-events:none}
+.ih{display:flex;align-items:center;gap:9px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--line)}
+.ih .dot{width:8px;height:8px;border-radius:2px;flex:none}
+.ih .ttl{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font-size:10.5px;color:var(--mut);border:1px solid var(--line2);border-radius:4px;padding:0 6px;white-space:nowrap;line-height:17px}
+.badge:empty{display:none}
+.x{all:unset;margin-left:auto;cursor:pointer;width:24px;height:24px;border-radius:5px;display:grid;place-items:center;color:var(--mut);flex:none}
+.x:hover{background:var(--hover);color:var(--fg)}
+.ibody{overflow:auto;padding:12px 16px 16px;scrollbar-width:thin}
+.path{font:12px var(--mono);word-break:break-all}
+.path .dir{color:var(--mut)}
+.meta{font-size:11.5px;color:var(--mut);margin-top:3px}
+.acts2{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;border:1px solid var(--line2);background:transparent;text-decoration:none;font-size:12px;font-weight:500;cursor:pointer;transition:background .12s}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.btn.primary:hover{filter:brightness(1.1)}
+h4{margin:18px 0 6px;font-size:11.5px;font-weight:600;color:var(--mut);display:flex;gap:6px}
+h4 .n{color:var(--dim);font-weight:500}
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li>a,ul.list li>button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:8px 1fr auto;gap:9px;align-items:center;padding:5px 8px;border-radius:5px;cursor:pointer;text-decoration:none}
+ul.list li>a:hover,ul.list li>button:hover,ul.list li>a:focus-visible,ul.list li>button:focus-visible{background:var(--hover)}
+ul.list .a{font-size:12px;overflow:hidden;min-width:0}
+ul.list .a b{font-weight:600}
+ul.list .a span{display:block;font:11px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ul.list .s{font:11px var(--mono);color:var(--dim)}
+ul.list .s.dup{color:var(--dup)}
+ul.list.chunks li>a{grid-template-columns:72px 1fr}
+ul.list.chunks .ln{font:11px var(--mono);color:var(--acc)}
+ul.list.chunks .sn{font:11px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{font-size:12px;color:var(--dim);padding:3px 8px}
+
+/* toolbar */
+#bar{left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:3px;animation:barIn .35s .1s ease-out both}
+#bar button{all:unset;width:32px;height:32px;display:grid;place-items:center;border-radius:5px;cursor:pointer;color:var(--mut);position:relative}
+#bar button:hover{background:var(--hover);color:var(--fg)}
+#bar button.on{color:var(--fg);background:var(--press)}
+#bar .sep{width:1px;height:18px;background:var(--line2);margin:0 3px}
+#bar button[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:40px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--pan);border:1px solid var(--line2);color:var(--fg);font-size:11.5px;padding:3px 8px;border-radius:5px;pointer-events:none}
+#bar #menu{display:none}
+#hint{position:fixed;bottom:62px;left:50%;transform:translateX(-50%);font-size:11.5px;color:var(--dim);white-space:nowrap;transition:opacity .5s;pointer-events:none}
+
+#tip{position:fixed;pointer-events:none;padding:5px 9px;border-radius:6px;background:var(--pan);border:1px solid var(--line2);font-size:11.5px;max-width:380px;opacity:0;transition:opacity .1s;z-index:5}
+#tip.show{opacity:1}
+#tip b{font-weight:600}
+#tip span{display:block;font:11px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#load{position:fixed;inset:0;display:grid;place-items:center;z-index:9;transition:opacity .5s;pointer-events:none;background:var(--bg)}
+#load.gone{opacity:0}
+#load .box{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12.5px}
+#load .sp{width:16px;height:16px;border-radius:50%;border:2px solid var(--line2);border-top-color:var(--fg);animation:spin .8s linear infinite}
+#toast{position:fixed;left:50%;bottom:62px;transform:translate(-50%,6px);background:var(--pan);border:1px solid var(--line2);border-radius:6px;padding:5px 11px;font-size:12px;opacity:0;transition:.2s;pointer-events:none;z-index:8}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:820px){
+  #side{top:auto;left:8px;right:8px;bottom:60px;width:auto;max-height:52vh;transition:transform .3s ease,opacity .25s;animation:none}
+  #side.collapsed{transform:translateY(calc(100% + 70px));opacity:0;pointer-events:none}
+  #insp{top:8px;right:8px;left:8px;width:auto;max-height:50vh}
+  #bar{bottom:10px}
+  #hint{display:none}
+  #bar #menu{display:grid}
+  .lbl.repo{font-size:10px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div id="c" role="img" aria-label="3D graph of the pearOS code: layers, repositories, directories and files"></div>
+<div id="labels" aria-hidden="true"></div>
+<div id="load"><div class="box"><div class="sp"></div><span class="msg">Loading index…</span></div></div>
+
+<aside class="panel enter" id="side" aria-label="Map controls">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v5M12 10l-6 7M12 10l6 7M12 10v7"/><circle cx="12" cy="5" r="2.2" fill="currentColor"/><circle cx="6" cy="18" r="1.8" fill="currentColor"/><circle cx="12" cy="18" r="1.8" fill="currentColor"/><circle cx="18" cy="18" r="1.8" fill="currentColor"/></svg></div>
+    <div><h1>Code Map</h1><p>pearOS · all repositories</p></div>
+  </div>
+  <div class="search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <label class="sr" for="q">Filter by path, symbol or text</label>
+    <input id="q" type="search" placeholder="Filter by path, symbol or text" autocomplete="off" spellcheck="false">
+    <span class="kbd" aria-hidden="true">/</span>
+  </div>
+  <div id="qinfo" aria-live="polite"></div>
+  <div id="hits"></div>
+  <div class="stats">
+    <div class="stat"><b id="sFiles">–</b><span>Files</span></div>
+    <div class="stat"><b id="sRepos">–</b><span>Repositories</span></div>
+    <div class="stat"><b id="sDups">–</b><span>Duplicates</span></div>
+  </div>
+  <div class="sect"><span>Repositories</span><span><button class="chip" id="all">All</button><button class="chip" id="none">None</button></span></div>
+  <div id="legend"></div>
+  <div class="foot"><span class="live" id="live"></span><span id="upd">Connecting…</span><a href="https://github.com/pearOS-bsd/codemap" target="_blank" rel="noopener">About ↗</a></div>
+</aside>
+
+<section class="panel hide" id="insp" aria-label="Selection" aria-live="polite">
+  <div class="ih"><span class="dot" id="iDot"></span><span class="ttl" id="iTitle"></span><span class="badge" id="iBadge"></span>
+    <button class="x" id="iClose" aria-label="Close"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="ibody" id="iBody"></div>
+</section>
+
+<div id="hint">Drag to rotate · Scroll to zoom · Click a node to inspect · <span class="mono">/</span> to search</div>
+<nav class="panel" id="bar" aria-label="View">
+  <button id="menu" data-tip="Repositories" aria-label="Show repositories"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+  <button id="bReset" data-tip="Fit graph (R)" aria-label="Fit graph"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+  <button id="bRot" data-tip="Auto-rotate (A)" aria-label="Auto-rotate" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="12" rx="9" ry="4"/><path d="M18 14.5l2.5 1.2-1 2.6"/></svg></button>
+  <button id="bDup" data-tip="Cross-repo duplicates (D)" aria-label="Cross-repo duplicates" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
+  <button id="bLbl" data-tip="Labels (L)" aria-label="Labels" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg></button>
+  <span class="sep"></span>
+  <button id="bTheme" data-tip="Theme (T)" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  <button id="bFull" data-tip="Full screen (F)" aria-label="Full screen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg></button>
+</nav>
+<div id="tip" role="tooltip"></div>
+<div id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.80.0/dist/3d-force-graph.min.js"></script>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.getElementById(s);
+const ORG='https://github.com/pearOS-bsd/',BRANCH='main';
+const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=n=>n.toLocaleString('en-US');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const idOf=x=>typeof x==='object'?x.id:x;
+
+/* ---------- architecture layers (a lower layer never depends on a higher one) ---------- */
+const LAYERS=[
+  {k:'L0',name:'Kernel & ABI',hue:355,repos:['darwinator','IOKit','kext','virtio','clevo_wmi']},
+  {k:'L1',name:'Runtime & loader',hue:32,repos:['dyld','macdeps','libsystem','libdispatch','libobjc','libcxx','libxpc','swift-runtime','thirdparty','ploader']},
+  {k:'L2',name:'Core frameworks',hue:150,repos:['CoreFoundation','Foundation','CoreGraphics','CoreText','ImageIO','Security','SystemConfiguration','CFNetwork','CoreServices','IconServices','LaunchServices','CoreUI','SDK','CoreAudio','CoreWLAN','IOBluetooth','IOPS','DisplayServices','PrivateFrameworks']},
+  {k:'L3',name:'UI & windowing',hue:212,repos:['SkyLight','WindowServer','QuartzCore','Solarium','UIFoundation','HIToolbox','AppKit','open']},
+  {k:'L4',name:'Daemons & apps',hue:268,repos:['d','apps','DoNotDisturb']},
+  {k:'T',name:'Tooling & docs',hue:215,sat:14,repos:['iso','tests','docs','research','pearos-skill','codemap','misc','pkgbuild','package-repo']},
+];
+const OTHER={k:'X',name:'Other',hue:0,sat:0,repos:[]};
+const layerOf=r=>LAYERS.find(L=>L.repos.includes(r))||OTHER;
+function repoColor(r){const L=layerOf(r),i=Math.max(0,L.repos.indexOf(r)),n=L.repos.length;
+  const h=(L.hue+((n>1?i/(n-1):.5)-.5)*Math.min(40,n*8)+360)%360;return `hsl(${h.toFixed(0)},${L.sat??62}%,${58+((i%3)-1)*6}%)`}
+const layerColor=L=>`hsl(${L.hue},${L.sat??62}%,62%)`;
+
+/* ---------- state ---------- */
+let G=null,graph=null,byId=new Map(),adj=new Map(),hidden=new Set(),focus=null,hover=null,sel=null,showDup=true,showLbl=true;
+
+/* ---------- theme ---------- */
+const root=document.documentElement;
+let theme=(()=>{try{return localStorage.getItem('codemap-theme')}catch{return null}})()||'dark';
+function applyTheme(){root.dataset.theme=theme;document.querySelector('meta[name=theme-color]').content=theme==='light'?'#f5f6f8':'#05070a';
+  if(graph){const r=byId.get('root');if(r)r.color=theme==='light'?'#15181d':'#e6e8eb'}if(G)refresh()}
+$('bTheme').onclick=()=>{theme=theme==='light'?'dark':'light';try{localStorage.setItem('codemap-theme',theme)}catch{}applyTheme()};
+
+/* ---------- points.json → tree: pearOS → layers → repositories → directories → files ---------- */
+function buildGraph(d){
+  const ch=[];for(let i=0;i<d.x.length;i++){const repo=d.repos[d.r[i]],f=d.files[d.f[i]]||'';if(!repo||!f||f.endsWith('/'))continue;
+    ch.push({repo,file:f,path:f.slice(f.indexOf('/')+1),l:d.l[i]|0,e:d.e[i]|0,t:d.t[i]||'',x:d.x[i],y:d.y[i],z:d.z[i],o:i})}
+  const inv=new Map(ch.map((c,j)=>[c.o,j]));
+  const nodes=[],links=[],N=new Map();const add=n=>{N.set(n.id,n);nodes.push(n);return n};
+  add({id:'root',kind:'root',name:'pearOS',val:45,color:theme==='light'?'#15181d':'#e6e8eb'});
+  const files=new Map();ch.forEach((c,j)=>{let f=files.get(c.file);if(!f){f={repo:c.repo,path:c.path,chunks:[]};files.set(c.file,f)}f.chunks.push(j)});
+  const repos=new Map();for(const [k,f] of files){if(!repos.has(f.repo))repos.set(f.repo,[]);repos.get(f.repo).push(k)}
+  for(const L of [...LAYERS,OTHER].filter(L=>[...repos.keys()].some(r=>layerOf(r)===L))){
+    add({id:'l:'+L.k,kind:'layer',name:L.name,layer:L,val:18,color:layerColor(L)});links.push({source:'root',target:'l:'+L.k,kind:'tree',tk:'layer'})}
+  for(const [r,fks] of repos){const L=layerOf(r),col=repoColor(r),nch=fks.reduce((s,k)=>s+files.get(k).chunks.length,0);
+    add({id:'r:'+r,kind:'repo',name:r,repo:r,layer:L,val:Math.max(6,Math.sqrt(nch)*2.4),color:col,nch,nfiles:fks.length});
+    links.push({source:'l:'+L.k,target:'r:'+r,kind:'tree',tk:'repo'});
+    const dirs=new Map();for(const k of fks){const p=files.get(k).path,s=p.indexOf('/'),dk=s>0?p.slice(0,s):'';if(!dirs.has(dk))dirs.set(dk,[]);dirs.get(dk).push(k)}
+    for(const [dk,list] of dirs){let parent='r:'+r;
+      if(dk&&list.length>1){const id='d:'+r+'/'+dk;add({id,kind:'dir',name:dk+'/',repo:r,layer:L,val:Math.max(1.4,Math.sqrt(list.length)*.9),color:col,files:list});links.push({source:parent,target:id,kind:'tree',tk:'dir'});parent=id}
+      for(const k of list){const f=files.get(k),n=f.chunks.length;let cx=0,cy=0,cz=0;for(const j of f.chunks){cx+=ch[j].x;cy+=ch[j].y;cz+=ch[j].z}
+        add({id:'f:'+k,kind:'file',name:f.path.split('/').pop(),path:f.path,file:k,repo:r,layer:L,val:Math.max(.5,Math.sqrt(n)*.6),color:col,chunks:f.chunks,cen:[cx/n,cy/n,cz/n],text:f.chunks.map(j=>ch[j].t).join(' ').toLowerCase()});
+        links.push({source:parent,target:'f:'+k,kind:'tree',tk:'file'})}}}
+  // cross-repository near-duplicates: chunk pairs folded to file pairs (best score kept)
+  const dup=new Map();
+  for(const [a,b,s] of d.links||[]){const A=inv.get(a),B=inv.get(b);if(A==null||B==null)continue;const fa='f:'+ch[A].file,fb='f:'+ch[B].file;if(fa===fb)continue;
+    const [p,q]=fa<fb?[fa,fb]:[fb,fa],key=p+'|'+q,sc=s??.9,cur=dup.get(key);
+    if(!cur)dup.set(key,{source:p,target:q,kind:'dup',score:sc});else cur.score=Math.max(cur.score,sc)}
+  for(const l of dup.values())links.push(l);
+  return {nodes,links,ch,N,updated:d.updated,nFiles:files.size,nRepos:repos.size,nDup:dup.size,repoFiles:repos}
+}
+
+/* ---------- graph rendering ---------- */
+const visibleNode=n=>!!n&&(!n.repo||!hidden.has(n.repo));
+const dimNode=()=>theme==='light'?'rgba(140,148,160,0.10)':'rgba(120,130,150,0.035)';
+function nodeColor(n){if(sel&&n.id===sel.id)return n.color;return !focus||focus.has(n.id)?n.color:dimNode()}
+const dupParticles=l=>l.kind==='dup'&&!REDUCE&&(!focus||(focus.has(idOf(l.source))&&focus.has(idOf(l.target))))?2:0;
+function linkColor(l){const s=idOf(l.source),t=idOf(l.target),on=!focus||(focus.has(s)&&focus.has(t));
+  if(l.kind==='dup')return on?(theme==='light'?'rgba(154,103,0,.85)':'rgba(227,179,65,.8)'):'rgba(227,179,65,.06)';
+  const tn=byId.get(t);if(!on||!tn)return theme==='light'?'rgba(120,130,150,.07)':'rgba(120,130,150,.05)';
+  return tn.color.replace('hsl(','hsla(').replace(')',l.tk==='file'?(theme==='light'?',.45)':',.38)'):(theme==='light'?',.8)':',.7)'))}
+
+function init(){
+  G=ForceGraph3D({controlType:'orbit',rendererConfig:{antialias:true,alpha:true}})($('c'))
+    .width(innerWidth).height(innerHeight).backgroundColor('rgba(0,0,0,0)').showNavInfo(false)
+    .nodeId('id').nodeVal('val').nodeRelSize(1.7).nodeResolution(20).nodeOpacity(.96)
+    .nodeColor(nodeColor).nodeLabel(()=>'').nodeVisibility(visibleNode)
+    .linkVisibility(l=>(l.kind!=='dup'||showDup)&&visibleNode(byId.get(idOf(l.source)))&&visibleNode(byId.get(idOf(l.target))))
+    .linkColor(linkColor).linkOpacity(1).linkWidth(l=>l.kind==='dup'?.6:l.tk==='layer'?1.1:l.tk==='repo'?.55:0).linkCurvature(l=>l.kind==='dup'?.3:0)
+    .linkDirectionalParticles(dupParticles).linkDirectionalParticleWidth(1.4).linkDirectionalParticleSpeed(.004)
+    .linkDirectionalParticleColor(()=>theme==='light'?'#9a6700':'#f2cc60')
+    .onNodeHover(onHover).onNodeClick(n=>select(n,true)).onBackgroundClick(()=>sel&&clearSel())
+    .enableNodeDrag(false).warmupTicks(REDUCE?400:0).cooldownTime(REDUCE?0:7000);
+  // deterministic radial tree (see layoutTree); the simulation only animates nodes towards their slot
+  G.d3Force('charge',null).d3Force('center',null).d3Force('tree',treeForce());G.d3Force('link').strength(0);G.d3AlphaDecay(.022).d3VelocityDecay(.32);
+  const ctl=G.controls();ctl.autoRotate=!REDUCE;ctl.autoRotateSpeed=.45;
+  ctl.addEventListener('start',()=>{setRot(false);$('hint').style.opacity=0});
+  G.cameraPosition({x:0,y:1100,z:1100},{x:0,y:0,z:0});
+  addEventListener('resize',()=>{G.width(innerWidth).height(innerHeight);offsetView()});offsetView();
+}
+function refresh(){G.nodeColor(nodeColor).linkColor(linkColor).linkDirectionalParticles(dupParticles)}
+// on wide screens shift the projection right so the graph is centred in the space beside the sidebar (stays centred while rotating)
+const sideW=()=>innerWidth>820?332:0;
+function offsetView(){const c=G.camera(),s=sideW();if(s)c.setViewOffset(innerWidth,innerHeight,-s/2,0,innerWidth,innerHeight);else c.clearViewOffset();c.updateProjectionMatrix()}
+
+/* ---------- radial tree layout ("canopy") ----------
+   Classic radial tree: every node owns an angular wedge proportional to the number of files below it; depth sets the
+   radius and the height, so the root sits on top and the branches fall towards the files on the outer rings. */
+const LEVEL={root:[0,150],layer:[150,95],repo:[320,35],dir:[430,-5]};
+function layoutTree(g){const kids=new Map();for(const l of g.links){if(l.kind!=='tree')continue;const a=idOf(l.source);if(!kids.has(a))kids.set(a,[]);kids.get(a).push(byId.get(idOf(l.target)))}
+  const leaves=n=>n._w??(n._w=(kids.get(n.id)||[]).reduce((s,c)=>s+leaves(c),0)||1);
+  function place(n,a0,a1,depthR,depthY){const m=(a0+a1)/2;n.tx=Math.cos(m)*depthR;n.tz=Math.sin(m)*depthR;n.ty=depthY;
+    const cs=kids.get(n.id)||[];if(!cs.length)return;const W=cs.reduce((s,c)=>s+leaves(c),0),gap=n.kind==='root'?.06:n.kind==='layer'?.025:0;
+    let a=a0;cs.forEach((c,i)=>{const span=(a1-a0)*leaves(c)/W;const b0=a+span*gap/2,b1=a+span-span*gap/2;a+=span;
+      if(c.kind==='file'){const base=n.kind==='dir'?LEVEL.dir[0]:LEVEL.repo[0],row=i%4;place(c,b0,b1,base+85+row*22,(n.kind==='dir'?-45:-30)-row*12)}
+      else place(c,b0,b1,LEVEL[c.kind][0],LEVEL[c.kind][1])})}
+  const r=byId.get('root');if(r)place(r,0,Math.PI*2,0,LEVEL.root[1]);
+  for(const n of g.nodes)if(n.x==null){n.x=n.tx*.02;n.y=LEVEL.root[1];n.z=n.tz*.02}}
+function treeForce(){let nodes=[];const f=alpha=>{const k=.14*Math.max(alpha,.04);for(const n of nodes){if(n.tx==null)continue;n.vx+=(n.tx-n.x)*k;n.vy+=(n.ty-n.y)*k;n.vz+=(n.tz-n.z)*k}};
+  f.initialize=ns=>{nodes=ns};return f}
+function setData(g){
+  // a live update keeps the positions of nodes that already exist, so the layout does not explode
+  if(graph){const old=new Map(graph.nodes.map(n=>[n.id,n]));for(const n of g.nodes){const o=old.get(n.id);if(o){n.x=o.x;n.y=o.y;n.z=o.z}}}
+  graph=g;byId=g.N;adj=new Map();
+  for(const l of g.links){const a=idOf(l.source),b=idOf(l.target);if(!adj.has(a))adj.set(a,new Set());if(!adj.has(b))adj.set(b,new Set());adj.get(a).add(b);adj.get(b).add(a)}
+  layoutTree(g);G.graphData({nodes:g.nodes,links:g.links});makeLabels();buildLegend();stats();refilter();
+}
+
+/* ---------- HTML labels for the upper levels (crisp at any zoom) ---------- */
+let labels=[];
+function makeLabels(){const box=$('labels');box.innerHTML='';labels=[];
+  for(const n of graph.nodes)if(n.kind==='root'||n.kind==='layer'||n.kind==='repo'){const el=document.createElement('div');el.className='lbl '+n.kind;el.textContent=n.kind==='layer'?n.layer.k+' · '+n.name:n.name;box.append(el);labels.push({n,el})}
+  const el=document.createElement('div');el.className='lbl file';box.append(el);labels.push({n:null,el,dyn:true})}
+const small=n=>n&&(n.kind==='file'||n.kind==='dir');
+function drawLabels(){if(!G||!graph)return;const cam=G.camera(),e=cam.matrixWorld.elements,fx=-e[8],fy=-e[9],fz=-e[10],cp=cam.position,t=G.controls().target;
+  const base=Math.hypot(cp.x-t.x,cp.y-t.y,cp.z-t.z),fov=Math.tan(cam.fov*Math.PI/360),placed=[];
+  const dyn=labels[labels.length-1],dn=small(hover)?hover:small(sel)?sel:null;
+  if(dn){const txt=dn.kind==='dir'?dn.repo+'/'+dn.name:dn.name;if(dyn.el.textContent!==txt)dyn.el.textContent=txt}
+  // priority: hovered/selected file, selection, root, layers, then repositories by size; a label that would overlap one already placed is hidden
+  const order=[dyn,...labels.slice(0,-1).sort((A,B)=>pri(B.n)-pri(A.n))];
+  for(const L of order){const n=L.dyn?dn:L.n;
+    if(!n||n.x==null||!showLbl||!visibleNode(n)){L.el.style.opacity=0;continue}
+    const depth=(n.x-cp.x)*fx+(n.y-cp.y)*fy+(n.z-cp.z)*fz;if(depth<=1){L.el.style.opacity=0;continue}
+    const p=G.graph2ScreenCoords(n.x,n.y,n.z),rad=Math.cbrt(n.val)*1.7/(depth*fov)*innerHeight/2,y=p.y+rad+3;
+    const w=(L.w??=L.el.offsetWidth||60),box=[p.x-w/2-3,y-1,p.x+w/2+3,y+15];
+    if(!L.dyn&&placed.some(b=>box[0]<b[2]&&box[2]>b[0]&&box[1]<b[3]&&box[3]>b[1])){L.el.style.opacity=0;continue}
+    placed.push(box);
+    let o=L.dyn?1:Math.max(.25,Math.min(1,1.5-depth/(base*1.5)));if(!L.dyn&&focus&&!focus.has(n.id))o*=.3;
+    L.el.style.opacity=o.toFixed(2);L.el.style.transform=`translate(${(p.x-w/2).toFixed(1)}px,${y.toFixed(1)}px)`}}
+const pri=n=>(sel&&n===sel?1e9:0)+(hover&&n===hover?1e9:0)+({root:1e7,layer:1e6,repo:0})[n.kind]+(n.nch||0);
+
+/* ---------- starfield (slow twinkle, slight parallax with the camera) ---------- */
+const sc=$('stars'),sx=sc.getContext('2d');let stars=[];
+function seedStars(){const dpr=Math.min(devicePixelRatio,2);sc.width=innerWidth*dpr;sc.height=innerHeight*dpr;sc.style.width=innerWidth+'px';sc.style.height=innerHeight+'px';sx.setTransform(dpr,0,0,dpr,0,0);
+  stars=Array.from({length:Math.round(innerWidth*innerHeight/2600)},()=>({x:Math.random(),y:Math.random(),r:Math.random()<.93?.35+Math.random()*.55:.9+Math.random()*.6,p:Math.random()*6.28,s:.3+Math.random()*.8,d:.3+Math.random()*.7}))}
+seedStars();addEventListener('resize',seedStars);
+function drawStars(t){sx.clearRect(0,0,innerWidth,innerHeight);if(theme==='light')return;let az=0,po=Math.PI/2;
+  if(G){const c=G.controls();if(c.getAzimuthalAngle){az=c.getAzimuthalAngle();po=c.getPolarAngle()}}
+  sx.fillStyle='#cfd6e6';
+  for(const s of stars){const x=((s.x-az*.03*s.d)%1+1)%1*innerWidth,y=((s.y+(po-Math.PI/2)*.03*s.d)%1+1)%1*innerHeight;
+    sx.globalAlpha=REDUCE?.5:.35+.35*Math.sin(t*.001*s.s+s.p);sx.beginPath();sx.arc(x,y,s.r,0,6.283);sx.fill()}sx.globalAlpha=1}
+
+/* ---------- legend ---------- */
+const closed=new Set();
+function buildLegend(){const L=$('legend');L.innerHTML='';
+  const groups=[...LAYERS,OTHER].map(Gp=>({Gp,repos:[...graph.repoFiles.keys()].filter(r=>layerOf(r)===Gp).sort((a,b)=>Gp.repos.indexOf(a)-Gp.repos.indexOf(b)||a.localeCompare(b))})).filter(x=>x.repos.length);
+  for(const {Gp,repos} of groups){const grp=document.createElement('div');grp.className='grp'+(closed.has(Gp.k)?' closed':'');
+    const total=repos.reduce((s,r)=>s+graph.repoFiles.get(r).length,0);
+    const gh=document.createElement('div');gh.className='gh';gh.tabIndex=0;gh.setAttribute('role','button');gh.setAttribute('aria-expanded',!closed.has(Gp.k));
+    gh.innerHTML=`<span class="sw" style="background:${layerColor(Gp)}"></span><span class="t"><small>${Gp.k}</small>${esc(Gp.name)}</span><span class="ct">${fmt(total)}</span><svg class="car" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>`;
+    const tog=()=>{grp.classList.toggle('closed');const c=grp.classList.contains('closed');closed[c?'add':'delete'](Gp.k);gh.setAttribute('aria-expanded',!c)};
+    gh.onclick=tog;gh.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog()}};
+    const rows=document.createElement('div');rows.className='rows';const inner=document.createElement('div');rows.append(inner);
+    for(const r of repos){const row=document.createElement('div');row.className='rrow';row.tabIndex=0;row.setAttribute('role','switch');row.dataset.r=r;
+      row.innerHTML=`<i style="background:${repoColor(r)}"></i><span class="nm">${esc(r)}</span><button class="only" title="Show only ${esc(r)}">only</button><span class="ct">${fmt(graph.repoFiles.get(r).length)}</span>`;
+      const flip=()=>{hidden.has(r)?hidden.delete(r):hidden.add(r);applyHidden()};
+      row.onclick=e=>{if(e.target.classList.contains('only')){hidden=new Set([...graph.repoFiles.keys()].filter(x=>x!==r));applyHidden();select(byId.get('r:'+r),true);return}flip()};
+      row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}};inner.append(row)}
+    grp.append(gh,rows);L.append(grp)}
+  syncLegend()}
+function syncLegend(){document.querySelectorAll('.rrow').forEach(el=>{const off=hidden.has(el.dataset.r);el.classList.toggle('off',off);el.setAttribute('aria-checked',!off)})}
+function applyHidden(){syncLegend();G.nodeVisibility(visibleNode).linkVisibility(G.linkVisibility());if(sel&&!visibleNode(sel))clearSel();refilter()}
+$('all').onclick=()=>{hidden.clear();applyHidden()};
+$('none').onclick=()=>{hidden=new Set(graph.repoFiles.keys());applyHidden()};
+
+/* ---------- focus: hover > selection > search ---------- */
+const parentOf=n=>n.kind==='file'||n.kind==='dir'?[...(adj.get(n.id)||[])].map(x=>byId.get(x)).find(p=>p&&(p.kind==='dir'||p.kind==='repo')&&p!==n&&(n.kind!=='dir'||p.kind==='repo')):n.kind==='repo'?byId.get('l:'+n.layer.k):n.kind==='layer'?byId.get('root'):null;
+function withAncestors(set,n){for(let p=n;p;p=parentOf(p))set.add(p.id);return set}
+function around(n){const f=new Set([n.id]);for(const m of adj.get(n.id)||[])f.add(m);return withAncestors(f,n)}
+let matchSet=null;
+function updateFocus(){focus=hover?around(hover):sel?around(sel):matchSet;refresh()}
+
+/* ---------- search ---------- */
+let qT=0;$('q').addEventListener('input',()=>{clearTimeout(qT);qT=setTimeout(refilter,100)});
+function refilter(){if(!graph)return;const q=$('q').value.trim().toLowerCase(),H=$('hits');H.innerHTML='';matchSet=null;
+  if(q){matchSet=new Set();const hits=[];for(const n of graph.nodes){if(n.kind!=='file'||hidden.has(n.repo))continue;
+      if(n.file.toLowerCase().includes(q)||n.text.includes(q)){withAncestors(matchSet,n);hits.push(n)}}
+    hits.sort((a,b)=>(b.file.toLowerCase().includes(q))-(a.file.toLowerCase().includes(q))||b.chunks.length-a.chunks.length);
+    $('qinfo').textContent=hits.length?`${fmt(hits.length)} matching file${hits.length>1?'s':''}`:'No matching files';
+    hits.slice(0,7).forEach(n=>{const b=document.createElement('button');b.innerHTML=`<i style="background:${n.color}"></i><span class="p">${esc(n.file)}</span><span class="n">${n.chunks.length}</span>`;b.title=n.file;b.onclick=()=>select(n,true);H.append(b)})}
+  else $('qinfo').textContent='';
+  updateFocus()}
+
+/* ---------- hover ---------- */
+const mouse={x:0,y:0};addEventListener('pointermove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;placeTip()});
+function placeTip(){const t=$('tip');if(!t.classList.contains('show'))return;t.style.left=Math.min(mouse.x+14,innerWidth-t.offsetWidth-8)+'px';t.style.top=Math.max(8,mouse.y-t.offsetHeight-12)+'px'}
+function describe(n){return n.kind==='file'?`${n.path} · ${n.chunks.length} chunk${n.chunks.length>1?'s':''}`:n.kind==='dir'?`${n.name} · ${n.files.length} files`:n.kind==='repo'?`${fmt(n.nfiles)} files · ${fmt(n.nch)} chunks`:n.kind==='layer'?`Layer ${n.layer.k}`:'All repositories'}
+function onHover(n){n=n||null;if(n===hover)return;hover=n;$('c').classList.toggle('hovering',!!n);const t=$('tip');
+  if(n){t.innerHTML=`<b>${esc(small(n)?n.repo:n.name)}</b><span>${esc(describe(n))}</span>`;t.classList.add('show');placeTip()}else t.classList.remove('show');
+  updateFocus()}
+
+/* ---------- selection & inspector ---------- */
+const ghFile=(repo,path,l,e)=>ORG+encodeURIComponent(repo)+'/blob/'+BRANCH+'/'+path.split('/').map(encodeURIComponent).join('/')+(l?`#L${l}`+(e>l?`-L${e}`:''):'');
+const ghTree=(repo,path)=>ORG+encodeURIComponent(repo)+'/tree/'+BRANCH+'/'+path.split('/').map(encodeURIComponent).join('/');
+const EXT='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+function nodeRow(n,score,cls){const b=document.createElement('button'),sub=n.kind==='file'?n.path:n.kind==='dir'?n.name:n.kind==='repo'?`${fmt(n.nfiles)} files`:'';
+  b.innerHTML=`<i style="background:${n.color}"></i><span class="a"><b>${esc(small(n)?n.repo:n.name)}</b><span>${esc(sub)}</span></span><span class="s ${cls||''}">${score!=null?esc(score):''}</span>`;
+  b.title=n.file||n.name;b.onclick=()=>{onHover(null);select(n,true)};b.onmouseenter=()=>onHover(n);b.onmouseleave=()=>onHover(null);const li=document.createElement('li');li.append(b);return li}
+const el=(tag,cls,html)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(html!=null)x.innerHTML=html;return x};
+const section=(title,count)=>el('h4',null,esc(title)+(count!=null?` <span class="n">${fmt(count)}</span>`:''));
+function dupsOf(n){const out=[];for(const l of graph.links){if(l.kind!=='dup')continue;const s=byId.get(idOf(l.source)),t=byId.get(idOf(l.target));
+    if(n.kind==='file'){if(s===n)out.push([t,l]);else if(t===n)out.push([s,l])}
+    else if(n.kind==='repo'){if(s.repo===n.repo&&t.repo!==n.repo)out.push([t,l]);else if(t.repo===n.repo&&s.repo!==n.repo)out.push([s,l])}}
+  return out.filter(([m])=>visibleNode(m)).sort((a,b)=>b[1].score-a[1].score)}
+function nearestFiles(n,k){const [x,y,z]=n.cen,out=[];for(const m of graph.nodes){if(m.kind!=='file'||m===n||hidden.has(m.repo))continue;const d=(m.cen[0]-x)**2+(m.cen[1]-y)**2+(m.cen[2]-z)**2;
+  if(out.length<k||d<out[out.length-1][1]){out.push([m,d]);out.sort((a,b)=>a[1]-b[1]);if(out.length>k)out.pop()}}return out.map(x=>x[0])}
+
+function select(n,fly){if(!n)return;sel=n;const B=$('iBody');B.innerHTML='';B.scrollTop=0;
+  $('iDot').style.background=n.color;
+  $('iTitle').textContent=n.kind==='dir'?n.repo+'/'+n.name:n.name;
+  $('iBadge').textContent=n.kind==='root'?'Organisation':n.kind==='layer'?'Layer '+n.layer.k:(n.layer.k==='X'?'':n.layer.k+' · ')+({repo:'Repository',dir:'Directory',file:'File'})[n.kind];
+  const acts=el('div','acts2');
+  const link=(href,label,primary)=>{const a=el('a','btn'+(primary?' primary':''),esc(label)+' '+EXT);a.href=href;a.target='_blank';a.rel='noopener';acts.append(a)};
+  const copy=el('button','btn','Copy link');copy.onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast('Link copied')}catch{toast('Copy failed')}};
+  const ul=(cls)=>el('ul','list'+(cls?' '+cls:''));
+  if(n.kind==='file'){const cut=n.path.lastIndexOf('/');
+    B.append(el('div','path',`<span class="dir">${esc(n.repo)}/${esc(cut>=0?n.path.slice(0,cut+1):'')}</span>${esc(n.path.slice(cut+1))}`),el('div','meta',`${n.chunks.length} indexed chunk${n.chunks.length>1?'s':''}`));
+    link(ghFile(n.repo,n.path),'Open on GitHub',true);link(ORG+encodeURIComponent(n.repo),'Repository');acts.append(copy);B.append(acts);
+    B.append(section('Chunks',n.chunks.length));const u=ul('chunks');
+    n.chunks.slice().sort((x,y)=>graph.ch[x].l-graph.ch[y].l).forEach(j=>{const c=graph.ch[j],a=el('a',null,`<span class="ln">${c.l?`L${c.l}–${c.e}`:'file'}</span><span class="sn">${esc(c.t.trim())}</span>`);
+      a.href=ghFile(c.repo,c.path,c.l,c.e);a.target='_blank';a.rel='noopener';a.title='Open these lines on GitHub';const li=el('li');li.append(a);u.append(li)});B.append(u);
+    const dd=dupsOf(n),ud=ul();B.append(section('Near-duplicates in other repositories',dd.length));
+    dd.length?dd.forEach(([m,l])=>ud.append(nodeRow(m,Math.round(l.score*100)+'%','dup'))):ud.append(el('li','empty','None. This code exists only here.'));B.append(ud);
+    const un=ul();B.append(section('Semantically closest files'));nearestFiles(n,6).forEach(m=>un.append(nodeRow(m)));B.append(un)}
+  else if(n.kind==='dir'){B.append(el('div','meta',`${n.files.length} files`));
+    link(ghTree(n.repo,n.name.replace(/\/$/,'')),'Open on GitHub',true);link(ORG+encodeURIComponent(n.repo),'Repository');acts.append(copy);B.append(acts);
+    B.append(section('Files',n.files.length));const u=ul();n.files.map(k=>byId.get('f:'+k)).sort((x,y)=>y.chunks.length-x.chunks.length).forEach(f=>u.append(nodeRow(f,f.chunks.length)));B.append(u)}
+  else if(n.kind==='repo'){B.append(el('div','meta',`${fmt(n.nfiles)} files · ${fmt(n.nch)} chunks · ${esc(n.layer.name)}`));
+    link(ORG+encodeURIComponent(n.repo),'Open on GitHub',true);acts.append(copy);B.append(acts);
+    const dd=dupsOf(n),ud=ul();B.append(section('Shared with other repositories',dd.length));
+    dd.length?dd.slice(0,10).forEach(([m,l])=>ud.append(nodeRow(m,Math.round(l.score*100)+'%','dup'))):ud.append(el('li','empty','No near-duplicate code elsewhere.'));B.append(ud);
+    B.append(section('Largest files'));const u=ul();graph.repoFiles.get(n.repo).map(k=>byId.get('f:'+k)).sort((x,y)=>y.chunks.length-x.chunks.length).slice(0,10).forEach(f=>u.append(nodeRow(f,f.chunks.length)));B.append(u)}
+  else if(n.kind==='layer'){B.append(el('div','meta','A lower layer never depends on a higher one.'));acts.append(copy);B.append(acts);
+    B.append(section('Repositories'));const u=ul();[...graph.repoFiles.keys()].filter(r=>layerOf(r)===n.layer).map(r=>byId.get('r:'+r)).sort((a,b)=>b.nch-a.nch).forEach(r=>u.append(nodeRow(r,fmt(r.nch))));B.append(u)}
+  else{B.append(el('div','meta',`${fmt(graph.nRepos)} repositories · ${fmt(graph.nFiles)} files · ${fmt(graph.ch.length)} chunks`));
+    link('https://github.com/pearOS-bsd','Organisation on GitHub',true);acts.append(copy);B.append(acts);
+    B.append(section('Layers'));const u=ul();graph.nodes.filter(x=>x.kind==='layer').forEach(l=>u.append(nodeRow(l)));B.append(u)}
+  $('insp').classList.remove('hide');history.replaceState(null,'','#'+new URLSearchParams({n:n.id}));
+  updateFocus();if(fly)flyTo(n)}
+function clearSel(){sel=null;$('insp').classList.add('hide');history.replaceState(null,'',location.pathname+location.search);updateFocus()}
+$('iClose').onclick=clearSel;
+function flyTo(n){setRot(false);if(n.kind==='root'){fit();return}const d={file:130,dir:170,repo:260,layer:380}[n.kind]||200,h=Math.hypot(n.x,n.y,n.z)||1,r=1+d/h;
+  G.cameraPosition({x:n.x*r,y:n.y*r,z:n.z*r},{x:n.x,y:n.y,z:n.z},REDUCE?0:1100)}
+function fit(){// frame the final layout (target slots), not the nodes still flying in
+  let R=1;for(const n of graph.nodes)if(visibleNode(n)&&n.tx!=null)R=Math.max(R,Math.hypot(n.tx,n.ty-40,n.tz));
+  const cam=G.camera(),half=cam.fov*Math.PI/360,avail=(innerWidth-sideW())/innerHeight,d=R*1.7/(Math.tan(half)*Math.min(avail,1.9));
+  setRot(false);G.cameraPosition({x:0,y:d*.72,z:d*.69},{x:0,y:-70,z:0},REDUCE?0:1400);if(!REDUCE)setTimeout(()=>{if(!sel&&!hover)setRot(true)},1500)}
+
+/* ---------- toolbar & keys ---------- */
+function setRot(on){if(G)G.controls().autoRotate=on;$('bRot').classList.toggle('on',on);$('bRot').setAttribute('aria-pressed',on)}
+function setDup(on){showDup=on;$('bDup').classList.toggle('on',on);$('bDup').setAttribute('aria-pressed',on);if(G)G.linkVisibility(G.linkVisibility())}
+function setLbl(on){showLbl=on;$('bLbl').classList.toggle('on',on);$('bLbl').setAttribute('aria-pressed',on)}
+$('bRot').onclick=()=>setRot(!G.controls().autoRotate);$('bDup').onclick=()=>setDup(!showDup);$('bLbl').onclick=()=>setLbl(!showLbl);$('bReset').onclick=fit;
+$('bFull').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.();
+$('menu').onclick=()=>$('side').classList.toggle('collapsed');
+if(matchMedia('(max-width:820px)').matches)$('side').classList.add('collapsed');
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1600)}
+addEventListener('keydown',e=>{const typing=e.target.tagName==='INPUT';
+  if(e.key==='/'&&!typing){e.preventDefault();$('side').classList.remove('collapsed');$('q').focus();return}
+  if(e.key==='Escape'){if(typing&&$('q').value){$('q').value='';refilter()}else if(sel)clearSel();else e.target.blur?.();return}
+  if(typing||e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key.toLowerCase();
+  if(k==='r')fit();else if(k==='a')setRot(!G.controls().autoRotate);else if(k==='d')setDup(!showDup);else if(k==='l')setLbl(!showLbl);else if(k==='t')$('bTheme').click();else if(k==='f')$('bFull').click()});
+
+/* ---------- stats & live status ---------- */
+function countUp(node,to){if(REDUCE){node.textContent=fmt(to);return}const t0=performance.now(),from=+(node.dataset.v||0);node.dataset.v=to;
+  (function f(t){const k=Math.min(1,(t-t0)/900),e=1-Math.pow(1-k,3);node.textContent=fmt(Math.round(from+(to-from)*e));if(k<1)requestAnimationFrame(f)})(t0)}
+function stats(){countUp($('sFiles'),graph.nFiles);countUp($('sRepos'),graph.nRepos);countUp($('sDups'),graph.nDup);updAgo()}
+function updAgo(){if(!graph)return;const s=Math.max(0,Date.now()/1000-graph.updated);
+  const t=s<90?'just now':s<3600?Math.round(s/60)+' min ago':s<86400?Math.round(s/3600)+' h ago':Math.round(s/86400)+' days ago';
+  $('upd').textContent='Live · indexed '+t;$('upd').title=new Date(graph.updated*1000).toLocaleString()}
+setInterval(updAgo,30000);
+
+/* ---------- data ---------- */
+async function load(){
+  try{const r=await fetch('points.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);const d=await r.json();
+    $('live').classList.remove('down');
+    if(!graph||d.updated!==graph.updated){const first=!graph,keep=sel&&sel.id;setData(buildGraph(d));
+      if(first){$('load').classList.add('gone');const want=new URLSearchParams(location.hash.slice(1)).get('n');
+        setTimeout(()=>{const n=want&&byId.get(want);n?select(n,true):fit()},REDUCE?0:300)}
+      else{toast('Index updated');const n=keep&&byId.get(keep);n?select(n,false):sel&&clearSel()}}
+    updAgo()}
+  catch(err){$('live').classList.add('down');$('upd').textContent=graph?'Offline · showing last index':'Index not available';
+    if(!graph){$('load').querySelector('.msg').textContent='The index is not available yet.';$('load').querySelector('.sp').style.display='none'}}}
+
+if(typeof ForceGraph3D!=='function'){$('load').querySelector('.msg').textContent='Could not load the graph library.';$('load').querySelector('.sp').style.display='none';return}
+init();applyTheme();setRot(!REDUCE);setDup(true);setLbl(true);load();setInterval(load,60000);
+(function frame(t){requestAnimationFrame(frame);drawStars(t);drawLabels()})(0);
+})();
+</script>
+</body>
+</html>
