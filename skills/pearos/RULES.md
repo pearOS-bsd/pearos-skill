@@ -13,6 +13,7 @@
 
 ## Work quality
 7. **Search first, do not reinvent the wheel.** Before writing anything: look in our repos, in `upstream/` folders, on GitHub (`gh search code/repos`), in apple-oss-distributions, ravynOS, NextBSD, Cocotron, swift-corelibs. Only build what does not exist; record what you found in the commit or the docs.
+8a. **The goal is an open-source implementation of macOS, not a lookalike** (owner, 2026-11-19).  Every piece that has a counterpart on the Mac speaks Apple's real wire protocol, API/ABI, file formats and preference files (the real ones, found by decompiling and by observing the Mac VM); never propose a protocol of our own as a shortcut.  Check in both directions: a real Apple client against our server and ours against Apple's.
 8. **Do exactly what Apple does.** When a behaviour or a design choice exists on the Mac, find Apple's real answer (decompile with rea/ghidra, observe on the Mac VM, Apple open source) and copy the *behaviour*. Write the evidence in `docs/development/APPLE-DECISIONS.md` (see `APPLE.md`). If it cannot be found, ask the user — do not guess silently.
 9. **Test on the VM** (FreeBSD VM for everything that runs; Mac VM only to compare/measure). A change is not done until it ran on the VM. Screenshots with `wsshot`.
 10. **Prepare CI/CD for every piece of work**: a workflow that builds and tests it (GitHub Actions, FreeBSD VM action where needed), added or updated in the same change.
