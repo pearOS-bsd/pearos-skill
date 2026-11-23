@@ -42,3 +42,9 @@ The Claude skill that makes the model "talk like a caveman" (JuliusBrussee/cavem
 
 ## Reading a macOS framework that lives in the dyld cache (x86_64 cache of the Mac VM)
 Copy `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_x86_64h*` to `~/.pear/dsc` (rsync, ~5.5 GB, never in a repo); `~/.pear/bin/ipsw` (blacktop/ipsw release); `ipsw dyld extract <cache> QuartzCore --output ~/.pear/extracted` gives a Mach-O REA can open (`ipsw dyld disass` works only for arm64 caches). `ipsw dyld macho <cache> <image> --objc` lists the classes. Metal libraries (`*.metallib`, AIR) are in the framework Resources: scp them from the Mac; `metal2vulkan` (github.com/steelbrain/metal2vulkan, build with `cargo build --release -p metal2vulkan --features cli`) translates them; needs `--profile crates/metal2vulkan-validation/profiles/*.json`, `--function` vertex + `--fragment`, `--color-format 0:RGBA16Float`, `--vertex-descriptor`; validate with SPIRV-Tools >= v2026.4.
+
+## Looking inside closed Mac libraries (2026-11-22)
+- On the lab VM: `darwinator/tools/bp.c` (ptrace breakpoints; `/tmp/bp PID ADDR..`, ADDR = unslid cache address + 0x1940c000; kill stale `bp` first, 'Device busy' = already traced). Build on the dev FreeBSD VM.
+- On the Mac VM: `lldb -b -s cmd` via `launchctl asuser 501` (run_gui scripts under /tmp/akh), `breakpoint set -a <addr + 0xeef9000>`, plain `expression`/`register read` lines after `continue` (not `breakpoint command add`); `DYLD_INSERT_LIBRARIES` needs a re-signed binary (`codesign --force --sign -`) and must be set inside `perl -e '$ENV{...}=...; exec @ARGV'`.
+- Symbols and addresses: `ipsw dyld macho dsc/dyld_shared_cache_x86_64h <Framework> --symbols`, `ipsw dyld a2s`; decompile with REA (`open_binary ~/.pear/extracted/<name>`, one binary open at a time, analysis takes ~10 minutes).
+- Lab VM stack: restart everything (`scratchpad/full.sh`), wait ~100 s; `gmake clean` after a header change.
