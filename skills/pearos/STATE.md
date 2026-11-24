@@ -1,7 +1,10 @@
-# State of the project (update at every milestone; last: 2026-11-19)
+# State of the project (update at every milestone; last: 2026-11-24)
 
 
-2026-11-24: dyld from source (dyld/docs/BUILD-FROM-SOURCE.md, 26/70 files) is not cancelled, just not worked on at the moment (the owner only said it is not needed for the current work). Active: third-party Mach-O frameworks on darwinator with our own host library (private repository).
+ACTIVE (2026-11-24, owner request): run a real third-party Mac application (CotEditor 7.1.3) on the Mach-O frameworks of a third-party compatibility layer, on pearOS (darwinator + the real dyld), with a host library of our own. Work lives in the PRIVATE repository `hostlib` (never name the third-party layer in a public repo: owner rule, history of research/dyld/pearos-skill/misc was rewritten for it).
+  Done: frameworks load through the real dyld (env DYLD_FRAMEWORK_PATH; paths /usr/lib/swift/ -> /usr/lib/swifz/ patched to avoid a cache alias re-export loop), a shim dylib provides the loader's service table and the 317-entry host function table (version 0x18), epoll-shim (MIT) under the Linux ABI for the CoreFoundation run loop, Swift metadata pages via a host call. CotEditor starts, reads its resources and stays alive in its run loop.
+  Next: implement the host entries in the order of the Linux trace (5, 71-73, 121, then window, view, drawing, text, menus); entries used: 0 1 2 6 7 8 77 79 80 211 213 215 234 implemented (79/80/211/213 minimal). Tools: tools/locate-crash.py, tools/iterate.py, ktrace/kdump on the VM.
+  dyld from source (dyld/docs/BUILD-FROM-SOURCE.md, 26/70 files) is not cancelled, just not on the critical path.
 
 MEASURED (2026-11-24): machrun cannot be retired yet. Keka CLI test (tests/darwinator-apps/keka.sh): machrun 37 ok / 0 FAIL, darwinator direct 28 ok / 9 FAIL (utimensat EINVAL, hw.ncpu sysctl EPERM, too many open files). Fix in darwinator, rerun, then move machrun + GNUstep path to legacy. Details: tests/docs/DARWINATOR-VS-MACHRUN.md. Planned after: replace rc.d (OpenRC-style) with launchd as PID 1 (discussion pending).
 EXPERIMENT (2026-11-24): fork github.com/pearOS-bsd/xnubsd (clone ~/pearOS/xnubsd) of AFK-surf/xnulinux: host the real XNU (Tahoe x86_64, built from apple-oss xnu-12377.x) as a FreeBSD module with the Mac VM userland; plan and licence rule in xnubsd/PEAROS.md. Not started beyond fork + analysis; darwinator stays the main path.

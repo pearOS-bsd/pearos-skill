@@ -44,6 +44,7 @@ daemons (d): launchd, notifyd, wsbridge (Mac client lib <-> WindowServer), lsd (
 | `research` | decompile dumps, notes, probes, lab, legacy workflows |
 | `pearos-skill` | THIS skill |
 **Planned libraries for a cache of our own** (each has `upstream/` sources from other projects + PROVENANCE.md; mostly empty of our code): `libsystem libdispatch libobjc libcxx libxpc CoreFoundation Foundation CoreGraphics CoreText ImageIO UIFoundation IconServices CoreServices Security SystemConfiguration CFNetwork HIToolbox PrivateFrameworks swift-runtime thirdparty`
+**Private**: `hostlib` (host library for third-party Mach-O frameworks; never named in public files).
 **Not ours / earlier**: `ploader` (boot loader fork of rEFInd), `clevo_wmi`, `virtio` (virtio_gpu port), `package-repo`, `pkgbuild`, `AppStore-Backend`, `kext`, `misc` (emptied; pointer README).
 
 ## Other projects we looked at (details in docs/development/EXISTING-PROJECTS.md)
