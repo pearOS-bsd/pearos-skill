@@ -6,6 +6,8 @@ ACTIVE (2026-11-24, owner request): run a real third-party Mac application (CotE
   Next: implement the host entries in the order of the Linux trace (5, 71-73, 121, then window, view, drawing, text, menus); entries used: 0 1 2 6 7 8 77 79 80 211 213 215 234 implemented (79/80/211/213 minimal). Tools: tools/locate-crash.py, tools/iterate.py, ktrace/kdump on the VM.
   dyld from source (dyld/docs/BUILD-FROM-SOURCE.md, 26/70 files) is not cancelled, just not on the critical path.
 
+ACTIVE (2026-11-25, owner request): Linux-only source reconstruction of the ELF side of the third-party layer, in a separate private repository (its README has the state). Independent of `hostlib`; no code moves between them without the owner's decision.
+
 MEASURED (2026-11-24): machrun cannot be retired yet. Keka CLI test (tests/darwinator-apps/keka.sh): machrun 37 ok / 0 FAIL, darwinator direct 28 ok / 9 FAIL (utimensat EINVAL, hw.ncpu sysctl EPERM, too many open files). Fix in darwinator, rerun, then move machrun + GNUstep path to legacy. Details: tests/docs/DARWINATOR-VS-MACHRUN.md. Planned after: replace rc.d (OpenRC-style) with launchd as PID 1 (discussion pending).
 EXPERIMENT (2026-11-24): fork github.com/pearOS-bsd/xnubsd (clone ~/pearOS/xnubsd) of AFK-surf/xnulinux: host the real XNU (Tahoe x86_64, built from apple-oss xnu-12377.x) as a FreeBSD module with the Mac VM userland; plan and licence rule in xnubsd/PEAROS.md. Not started beyond fork + analysis; darwinator stays the main path.
 
