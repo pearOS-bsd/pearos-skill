@@ -1,7 +1,7 @@
 # State of the project (update at every milestone; last: 2026-11-19)
 
 
-2026-11-24: dyld from source (dyld/docs/BUILD-FROM-SOURCE.md, 26/70 files) is not cancelled, just not worked on at the moment (the owner only said it is not needed for the third-party layer work). Active: third-party layer frameworks on darwinator with our own host library (repo hostlib; research/docs/third-party layer/HOST-INTERFACE.md).
+2026-11-24: dyld from source (dyld/docs/BUILD-FROM-SOURCE.md, 26/70 files) is not cancelled, just not worked on at the moment (the owner only said it is not needed for the current work). Active: third-party Mach-O frameworks on darwinator with our own host library (private repository).
 
 MEASURED (2026-11-24): machrun cannot be retired yet. Keka CLI test (tests/darwinator-apps/keka.sh): machrun 37 ok / 0 FAIL, darwinator direct 28 ok / 9 FAIL (utimensat EINVAL, hw.ncpu sysctl EPERM, too many open files). Fix in darwinator, rerun, then move machrun + GNUstep path to legacy. Details: tests/docs/DARWINATOR-VS-MACHRUN.md. Planned after: replace rc.d (OpenRC-style) with launchd as PID 1 (discussion pending).
 EXPERIMENT (2026-11-24): fork github.com/pearOS-bsd/xnubsd (clone ~/pearOS/xnubsd) of AFK-surf/xnulinux: host the real XNU (Tahoe x86_64, built from apple-oss xnu-12377.x) as a FreeBSD module with the Mac VM userland; plan and licence rule in xnubsd/PEAROS.md. Not started beyond fork + analysis; darwinator stays the main path.
