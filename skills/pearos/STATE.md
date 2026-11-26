@@ -8,6 +8,8 @@ ACTIVE (2026-11-24, owner request): run a real third-party Mac application (CotE
 
 ACTIVE (2026-11-25, owner request): Linux-only source reconstruction of the ELF side of the third-party layer, in a separate private repository (its README has the state). Independent of `hostlib`; no code moves between them without the owner's decision.
 
+DOCK-COCOA ON PEAROS (2026-11-26): builds on FreeBSD (`apps/dock-cocoa/build-bsd.sh`) and runs on the ISO of 2026-11-20 (`~/.pear/isotest`, run-vm.sh + cache.img; sshd had to be started by hand from the Terminal through the QEMU monitor). Blocks at start in IconServices (no iconservicesagent/iconservicesd on that cache disk). With icons skipped the bar is painted, but at the TOP (y flipped), black, 3 tiles. Next: IconServices daemons via macdeps or async/timeout icons, y flip in ca_scene.c, prefs, material. Details: apps/dock-cocoa/README.md "On pearOS".
+
 MEASURED (2026-11-24): machrun cannot be retired yet. Keka CLI test (tests/darwinator-apps/keka.sh): machrun 37 ok / 0 FAIL, darwinator direct 28 ok / 9 FAIL (utimensat EINVAL, hw.ncpu sysctl EPERM, too many open files). Fix in darwinator, rerun, then move machrun + GNUstep path to legacy. Details: tests/docs/DARWINATOR-VS-MACHRUN.md. Planned after: replace rc.d (OpenRC-style) with launchd as PID 1 (discussion pending).
 EXPERIMENT (2026-11-24): fork github.com/pearOS-bsd/xnubsd (clone ~/pearOS/xnubsd) of AFK-surf/xnulinux: host the real XNU (Tahoe x86_64, built from apple-oss xnu-12377.x) as a FreeBSD module with the Mac VM userland; plan and licence rule in xnubsd/PEAROS.md. Not started beyond fork + analysis; darwinator stays the main path.
 
