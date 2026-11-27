@@ -13,7 +13,7 @@ CASES=[
 ("CATransaction begin commit flush","QuartzCore/src/CATransaction.m"),
 ("load a nib and connect outlets","AppKit/decompiled/src/OpenNib.m"),
 ("save panel and open panel service","AppKit/decompiled/src/OpenFilePanels.m"),
-("dock layout of tiles and magnification","apps/dock/dock_layout.h"),
+("dock layout of tiles and magnification","apps/dock-cocoa/layout/dock_layout.h"),
 ("how to convert a plist to binary","iso/tools"),
 ("licence audit of libraries loaded by a binary","iso/licenses/audit.sh"),
 ("dyld shared cache extraction from the Mac","macdeps"),
