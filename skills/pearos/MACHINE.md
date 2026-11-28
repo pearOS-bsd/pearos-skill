@@ -17,6 +17,7 @@
 
 ## Mac VM (macOS 26.7.2, reference + build host for Mach-O)
 - OSX-KVM in `~/osx-vm/OSX-KVM` (`boot-macOS-headless.sh` style, ssh forward 2229), `ssh -p 2229 -i ~/fbsd-vm/id_ed25519 -o IdentitiesOnly=yes alex@localhost`. Display 1280x800.
+- reims GPU VM (`reims-ctl start|stop mac`, ssh 2229 as above): SIP OFF since 2026-11-28 (owner allowed; `csr-active-config = FF0F0000` in `~/.local/share/reims-ctl/vms/mac/opencore.qcow2`, original in `opencore.qcow2.before-sip-off`).
 - **sudo works with the password `pear` here too** (verified 2026-11-16: `echo pear | sudo -S -p "" CMD` as `alex`; SIP is disabled, authenticated root enabled, boot-args `keepsyms=1`). dtrace, fs_usage, nvram are therefore available.
 - Used for: building Mach-O (`open/build-appkit.sh` via `open/deploy.sh`), `otool`, `lipo`, reading Apple files (via `macdeps`), measuring the real Dock/Finder.
 - **Often slow or unresponsive**: use short timeouts, background the command, do not block the session. `screencapture` over ssh WORKS since 2026-11-16: a row was added to the system TCC.db (`kTCCServiceScreenCapture` for `/usr/libexec/sshd-keygen-wrapper`, auth_value 2; backup of the database at `/Users/alex/TCC.db.backup-before-screencapture`; to undo: `sudo cp` it back and `sudo killall tccd`). Use `ssh ... screencapture -x /tmp/s.png` then `scp` it and look at it (Read tool on the png).
